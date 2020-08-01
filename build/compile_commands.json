@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/park/git/CPSIM_ROS2/build",
+  "command": "/usr/bin/g++-7    -g   -o CMakeFiles/CPSim_ROS.dir/main.cpp.o -c /home/park/git/CPSIM_ROS2/main.cpp",
+  "file": "/home/park/git/CPSIM_ROS2/main.cpp"
+}
+]
