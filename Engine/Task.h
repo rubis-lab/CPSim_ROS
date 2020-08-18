@@ -111,8 +111,7 @@ public:
 	bool get_is_write();
 	bool get_is_gpu_init();
 	bool get_is_gpu_sync();
-	PriorityPolicy get_priority_policy();
-
+	
 	std::vector<std::shared_ptr<Task>> get_producers();
 	std::vector<std::shared_ptr<Task>> get_consumers();
 	std::vector<std::string> get_producers_info();
@@ -158,7 +157,7 @@ public:
 //#endif
 	void loadFunction(std::string file_path, std::string function_name);
 	void run();
-  
+
 };
 
 #endif
