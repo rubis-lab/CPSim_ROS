@@ -153,7 +153,6 @@ void Initializer::initialize(std::string location)
 
 void Initializer::random_task_generator(int task_num)
 {
-    int gpu_jobs = task_num * utils::gpu_task_percentage;
     if(!utils::enable_gpu_scheduling)
         gpu_jobs = 0;
     for(int i = 0; i < task_num; i++)
