@@ -12,7 +12,7 @@
  *  @file Logger.cpp
  *  @brief cpp file for Engine-Logger
  *  @author Seonghyeon Park
- *  @date 2020-03-31
+ *  @date 2020-08-19
  */
 
 
@@ -20,7 +20,7 @@
  * @fn Logger::Logger()
  * @brief the function of basic constructor of Logger
  * @author Seonghyeon Park
- * @date 2020-04-01
+ * @date 2020-08-19
  * @details 
  *  - None
  * @param none
@@ -38,7 +38,7 @@ Logger::Logger()
  * @fn Logger::~Logger()
  * @brief the function of basic destructor of Logger
  * @author Seonghyeon Park
- * @date 2020-04-01
+ * @date 2020-08-19
  * @details 
  *  - None
  * @param none
@@ -56,7 +56,7 @@ Logger::~Logger()
  * @fn void start_logging()
  * @brief this function starts the logging of simulation events
  * @author Seonghyeon Park
- * @date 2020-04-01
+ * @date 2020-08-19
  * @details 
  *  - None
  * @param none
@@ -78,35 +78,6 @@ void Logger::add_current_simulated_job(std::shared_ptr<Job> current_job_instance
 {
     m_execution_order_buffer.push_back(current_job_instance);
     m_current_time_buffer.push_back(utils::current_time);
-}
-void Logger::start_logging()
-{
-    std::cout << "Logging starts" << std::endl;
-    std::ofstream scheduling_log;
-    scheduling_log.open(utils::cpsim_path + "/Log/scheduling.log", std::ios::out);     
-    std::string contents = "ECU0: SENSING, ECU0: LK, ECU1: CC\n";
-    scheduling_log.write(contents.c_str(), contents.size());
-    scheduling_log.close();
-    
-    
-    // std::vector<std::string> contented;
-    // contented.push_back("0, ECU0: SENSING, 1\n");
-    // contented.push_back("0, ECU1: CC, 1\n");
-    // contented.push_back("15, ECU1: CC, 0\n");
-    // contented.push_back("20, ECU0: SENSING, 0\n");
-    // contented.push_back("20, ECU0: LK, 1\n");
-    // contented.push_back("20, ECU1: CC, 1\n");
-    // int i = 0;
-
-    // while(1)
-    //     for(i = 0; i < 6; ++i)
-    //     {
-    //         std::ofstream scheduling_log;
-    //         scheduling_log.open(utils::cpsim_path + "/Log/scheduling.log", std::ios::app);         
-    //         scheduling_log.write(contented.at(i).c_str(), contented.at(i).size());
-    //         scheduling_log.close();
-    //         sleep(1);
-    //     }
 }
 
 void Logger::log_task_vector_status()
@@ -133,14 +104,6 @@ void Logger::log_task_vector_status()
         contents += "TASK PERIOD:\t" + std::to_string(task->get_period()) + "\n";
         contents += "TASK BCET:\t" + std::to_string(task->get_bcet()) + "\n";
         contents += "TASK WCET:\t" + std::to_string(task->get_wcet()) + "\n";
-        if(task->get_priority_policy() == PriorityPolicy::GPU)
-        {
-            if( task->get_is_gpu_init()) 
-                contents += "GPU INIT\n";
-            if( task->get_is_gpu_sync())
-                contents += "GPU SYNC\n";
-        }
-        else contents += "TASK PROPERTY:\t CPU\n";
         contents += "TASK CONSTRAINTS:\t" + std::to_string(task->get_is_read()) + std::to_string(task->get_is_write()) + "\n";
         contents += "TASK ECU MAPPING IS:\t" + std::to_string(task->get_ECU()->get_ECU_id()) + "\n";
         contents += "TASK PRODUCERS :\t" + std::to_string(task->get_producers().size()) + "\n";
@@ -256,17 +219,6 @@ void Logger::print_job_execution_on_ECU(std::vector<std::shared_ptr<Job>> b, std
         std::stringstream stream;
         stream << std::fixed << std::setprecision(2) << std::setw (10) << job->get_est(); 
         contents += "EST: "+ stream.str() + "\t";
-    }
-    contents += "\n";
-    for(auto job : b)
-    {
-        std::stringstream stream;
-        //if(job->get_priority_policy() != PriorityPolicy::GPU) continue;
-        //stream << std::setw(10) << (job->get_priority_policy() == PriorityPolicy::GPU) ? "YES" : "NO";
-        if(job->get_priority_policy() == PriorityPolicy::GPU)
-            stream << std::setw(10) << "YES";
-        else stream << std::setw(10) << "NO";
-        contents += "GPU: " + stream.str() + "\t";
     }
     contents += "\n";
     for(auto job : b)

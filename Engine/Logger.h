@@ -31,7 +31,7 @@ public:
     std::vector<std::shared_ptr<Job>> get_execution_order_buffer();
     void set_execution_order_buffer(std::vector<std::shared_ptr<Job>>);
     void add_current_simulated_job(std::shared_ptr<Job>);
-    void start_logging();
+
     void log_task_vector_status();
     void log_job_vector_of_each_ECU_status();
     void log_job_vector_of_simulator_status();
