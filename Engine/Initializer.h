@@ -27,8 +27,6 @@ public:
     Initializer();
     ~Initializer();
 
-    int execution_time_mapping_function();
-        
     void random_task_generator(int); // this function is for experiments.
     void random_ecu_generator(int); // this function is for experiments.
     void random_producer_consumer_generator();
