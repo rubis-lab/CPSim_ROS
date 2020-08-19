@@ -3,8 +3,6 @@
 #include <cstdlib>
 #include <climits>
 #include <cmath>
-#include <pcan.h>
-#include <libpcan.h>
 
 /** 
  *  This file is the cpp file for the Initializer class.
@@ -65,36 +63,9 @@ Initializer::~Initializer()
  */
 void Initializer::initialize(std::string location)
 {    
-    /**
-     * Speicification Initialization
-     */
-    if (!location.empty())
-    {
-        utils::file_path = location;
-    }
-
     if(utils::real_workload == true)
     {
-        /**
-         * ECU Vector Initialization
-         */
-        for(int i = 0; i < vectors::ecu_vector.size(); i++)
-        {
-            std::vector<std::vector<std::shared_ptr<Job>>> vector_space_for_ecu;
-            vectors::job_vectors_for_each_ECU.push_back(vector_space_for_ecu);
-        }
-        /**
-         * Task Vector Initialization
-         */
-        for(int ecu_num =0; ecu_num < vectors::ecu_vector.size(); ecu_num++)
-        {
-            for(int i = 0; i < vectors::ecu_vector.at(ecu_num)->get_num_of_task(); i++)
-            {
-                std::vector<std::shared_ptr<Job>> vector_space_for_task_in_this_ecu;
-                vectors::job_vectors_for_each_ECU.at(ecu_num).push_back(vector_space_for_task_in_this_ecu);
-            }
 
-        }
     }   
     else
     {
@@ -102,28 +73,18 @@ void Initializer::initialize(std::string location)
          * ECU Vector Initialization
          * number of ECU is [3-10]
          */
-        //random_ecu_generator((rand() % 8) + 3);
-        random_ecu_generator(2);
+        random_ecu_generator((rand() % 8) + 3);
         
         /**
          * Task Vector Initialization
-         * Implement GPU / CPU job...
          */
-        //random_task_generator(0.3, 0.3, (rand() % 5 + 1) * vectors::ecu_vector.size());
-        random_task_generator(utils::task_amount);
-        if(utils::is_experimental == false)
-            for(auto task : vectors::task_vector)
-            {
-                task->synchronize_producer_consumer_relation();
-            }
-        else
-        {
-            /**
-             * Each task can be [0-2] data producer of random selected job.
-             */
-            random_constraint_selector(0.3, 0.3);
-            random_producer_consumer_generator();
-        }
+        random_task_generator(0.3, 0.3, (rand() % 5 + 1) * vectors::ecu_vector.size());
+
+        /**
+         * Each task can be [0-2] data producer of random selected job.
+         */
+        random_constraint_selector(0.3, 0.3);
+        random_producer_consumer_generator();
     }
                           
     
@@ -133,28 +94,15 @@ void Initializer::initialize(std::string location)
     utils::hyper_period = utils::calculate_hyper_period(vectors::task_vector);
     
     /**
-     * Logger Thread Initialized
-     */
-    if(utils::real_workload == true)
-    {
-        global_object::logger = std::make_shared<Logger>();
-        global_object::logger_thread = std::make_shared<std::thread>(&Logger::start_logging, global_object::logger);
-    }
-    else
-    {
-        global_object::logger = std::make_shared<Logger>();
-    }
+     * Global Logger Initialization
+     */    
+    global_object::logger = std::make_shared<Logger>();
     global_object::logger->log_task_vector_status();
 
-    /**
-     * CAN Receiver Thread Initialized
-     */
 }
 
 void Initializer::random_task_generator(int task_num)
 {
-    if(!utils::enable_gpu_scheduling)
-        gpu_jobs = 0;
     for(int i = 0; i < task_num; i++)
     {
         //if(gpu_jobs > 0)
@@ -162,17 +110,6 @@ void Initializer::random_task_generator(int task_num)
         std::string task_name = "TASK" + std::to_string(i);
         bool is_gpu_task = false;
         
-        if (utils::enable_gpu_scheduling)
-        {
-            int nth = task_num / (task_num * utils::gpu_task_percentage);
-            if(i % nth == 0 && gpu_jobs > 0)
-            {
-                --gpu_jobs;
-                is_gpu_task = true;
-                //std::cout << "Creating GPU Task." << std::endl;
-            }
-        }
-
         int period = rand() % 100; //[10-100] milli sec.
         if(period < 25)
             period = 10;
@@ -247,54 +184,6 @@ void Initializer::random_task_generator(int task_num)
             task->loadFunction("/lib/x86_64-linux-gnu/libc.so.6", "puts");
             task->set_priority_policy(PriorityPolicy::CPU);
             vectors::task_vector.push_back(std::move(task));
-        }
-        else if(utils::execute_gpu_jobs_on_cpu) // Work around to see if Fgr results are bogus or not.
-        {
-            int exec = 2;
-            int gpuWaitTime = wcet - exec;
-            std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, wcet, bcet, offset, is_read, is_write, ecu_id, producers, consumers);
-            task->loadFunction("/lib/x86_64-linux-gnu/libc.so.6", "puts");
-            task->set_priority_policy(PriorityPolicy::CPU);
-            task->penalty = true;
-            task->set_gpu_wait_time(gpuWaitTime);
-            vectors::task_vector.push_back(std::move(task));
-        }
-        else
-        {
-            std::shared_ptr<Task> init;
-            std::shared_ptr<Task> sync;
-            // Possible periods were set to 40 and 80
-            // if period == 40:
-            // bcet: 2
-            // wcet: 4
-            // if period == 80:
-            // bcet: 4
-            // wcet: 8
-            // Hard to use percentage as real schedule only works with integers...
-            int exec = 1; // Just put 1..
-            int gpu_wait_time = wcet - (exec * 2); // When sync job can start..init's end (wcet) 
-            // period = old period
-            // deadline = exec time
-            // init has sync as consumer.
-            // sync has init as producer.
-
-            init = std::make_shared<Task>(task_name, period, exec, exec, exec, offset, is_read, is_write, ecu_id, producers, consumers);
-            init->set_is_gpu_init(true);
-            init->set_is_gpu_sync(false);
-            init->set_gpu_wait_time(gpu_wait_time);
-            init->set_priority_policy(PriorityPolicy::GPU);
-
-            sync = std::make_shared<Task>(task_name, period, (exec * 2) + gpu_wait_time, exec, exec, offset, is_read, is_write, ecu_id, producers, consumers);
-            sync->set_is_gpu_sync(true);
-            sync->set_is_gpu_init(false);
-            sync->set_gpu_wait_time(gpu_wait_time);
-            sync->set_priority_policy(PriorityPolicy::GPU);
-
-            init->loadFunction("/lib/x86_64-linux-gnu/libc.so.6", "puts");
-            sync->loadFunction("/lib/x86_64-linux-gnu/libc.so.6", "puts");
-
-            vectors::task_vector.push_back(std::move(init));
-            vectors::task_vector.push_back(std::move(sync));
         }
     }
     // What is this?
