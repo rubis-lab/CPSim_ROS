@@ -7,14 +7,14 @@
  *  @file Task.cpp
  *  @brief cpp file for Engine-Task
  *  @author Seonghyeon Park
- *  @date 2020-03-31
+ *  @date 2020-08-19
  */
 
 /**
  * @fn Task::Task()
  * @brief the function of basic constructor of Task
  * @author Seonghyeon Park
- * @date 2020-04-01
+ * @date 2020-08-19
  * @details 
  *  - None
  * @param none
@@ -32,7 +32,7 @@ Task::Task()
  * @fn void Task::Task()
  * @brief the function of fundemental informed constructor of Task
  * @author Seonghyeon Park
- * @date 2020-04-01
+ * @date 2020-08-19
  * @details 
  *  This constructor has all properties that define each tasks in ECU. 
  * @param task_name
@@ -52,7 +52,7 @@ Task::Task()
  * @todo none
  */
 Task::Task(std::string task_name, int period, int deadline, int wcet,
-            int bcet, int offset, bool is_read, bool is_write, int ecu_id, PriorityPolicy policy)
+            int bcet, int offset, bool is_read, bool is_write, int ecu_id)
 {
     /**
      * Member variable initializaion
@@ -66,11 +66,6 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
     m_offset = offset;
     m_is_read = is_read;
     m_is_write = is_write;
-    m_priority_policy = policy;
-    m_is_gpu_init = false;
-    m_is_gpu_sync = false;
-    m_gpu_wait_time = 0;
-    penalty = false;
 
     for(auto iter = vectors::ecu_vector.begin(); iter != vectors::ecu_vector.end(); iter++)
     {
@@ -79,96 +74,6 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
             m_ecu = *iter;
         }
     }
-}
-
-// Example:
-// loadFunction("/lib/x86_64-linux-gnu/libc.so.6", "puts");
-// run("Hello World");
-
-// Note: Extension of implementation needed to support any parameter types and amount.
-//extern void sim_main();
-//extern "C" void test();
-
-void Task::loadFunction(std::string file_path, std::string function_name)
-{
-    void* handle;
-    void* func;
-    void* sharedVariable;
-#ifdef __linux__
-    handle = dlopen(file_path.c_str(), RTLD_LAZY);
-    if(handle != NULL)
-        std::cout << "Successfully loaded library." << std::endl;
-    else
-    {
-        std::cout << "Unsuccessfully loaded library." << std::endl;
-        std::cout << dlerror() << std::endl;
-    }
-    func = dlsym(handle, function_name.c_str()); //c_str() so we get \0 null terminator included in the string.
-    //sharedVariable = dlsym(handle, "shared_variable");
-    //this->shared_variable = (int *)sharedVariable;
-
-    // These variables are in shared.h, included by all .so files as rule.
-    int** shared1 = (int**)dlsym(handle, "shared1");
-    int** shared2 = (int**)dlsym(handle, "shared2");
-    int** shared3 = (int**)dlsym(handle, "shared3");
-    int** shared4 = (int**)dlsym(handle, "shared4");
-
-    // Make .so file point to the vars in utils.h shared:: namespace.
-    *shared1 = &shared::shared1;
-    *shared2 = &shared::shared2;
-    *shared3 = &shared::shared3;
-    *shared4 = &shared::shared4;
-
-    // Assign shared vars for CC
-    unsigned int** CC_Recv_ACCEL_VALUE = (unsigned int**)dlsym(handle, "CC_Recv_ACCEL_VALUE");
-    int** CC_Recv_TARGET_SPEED = (int**)dlsym(handle, "CC_Recv_TARGET_SPEED");
-    int** CC_Recv_SPEED = (int**)dlsym(handle, "CC_Recv_SPEED");
-    int** CC_Recv_CC_TRIGGER = (int**)dlsym(handle, "CC_Recv_CC_TRIGGER");
-    int** CC_Send_BRAKE = (int**)dlsym(handle, "CC_Send_BRAKE");
-    int** CC_Send_ACCEL = (int**)dlsym(handle, "CC_Send_ACCEL");
-
-    *CC_Recv_ACCEL_VALUE = &shared::CC_Recv_ACCEL_VALUE;
-    *CC_Recv_TARGET_SPEED = &shared::CC_Recv_TARGET_SPEED;
-    *CC_Recv_SPEED = &shared::CC_Recv_SPEED;
-    *CC_Recv_CC_TRIGGER = &shared::CC_Recv_CC_TRIGGER;
-    *CC_Send_BRAKE = &shared::CC_Send_BRAKE;
-    *CC_Send_ACCEL = &shared::CC_Send_ACCEL;
-
-    // Assign shared vars for LK
-    shared::ExtU** rtU = (shared::ExtU**)dlsym(handle, "rtU");
-    shared::DW** rtDW = (shared::DW**)dlsym(handle, "rtDW");
-    shared::ExtY** rtY = (shared::ExtY**)dlsym(handle, "rtY");
-
-    *rtU = &shared::rtU;
-    *rtDW = &shared::rtDW;
-    *rtY = &shared::rtY;
-
-    //std::cout << "last dlerror(): " << dlerror() << std::endl;
-#elif _WIN32
-    // Windows code for loading DLL func.
-#else
-#error "OS not recognised."
-#endif
-    m_casted_func = reinterpret_cast<void(*)()>(func); // Maybe need to put this in the preprocessor macro as well?
-}
-
-void Task::run()
-{
-    m_run_start = std::chrono::steady_clock::now();
-    m_casted_func();
-    m_run_end = std::chrono::steady_clock::now();
-    //0, ECU0: SENSING, 0
-
-    if(m_is_write == true)
-    {
-        CAN_message msg; 
-        msg.transmit_can_message(m_task_name);
-    }
-    else
-    {
-        
-    }
-    
 }
 
 long long Task::get_last_elapsed_nano_sec()
@@ -193,7 +98,7 @@ long long Task::get_last_elapsed_seconds()
 
 Task::Task(std::string task_name, int period, int deadline, int wcet,
             int bcet, int offset, bool is_read, bool is_write, int ecu_id,
-            std::vector<std::string> prodcuers, std::vector<std::string> consumers, PriorityPolicy policy)
+            std::vector<std::string> prodcuers, std::vector<std::string> consumers)
 {
     /**
      * Member variable initializaion
@@ -210,11 +115,6 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
     m_is_write = is_write;
     m_producers_info = prodcuers;
     m_consumers_info = consumers;
-    m_priority_policy = policy;
-    m_is_gpu_init = false;
-    m_is_gpu_sync = false;
-    m_gpu_wait_time = 0;
-    penalty = false;
     
     for(auto iter = vectors::ecu_vector.begin(); iter != vectors::ecu_vector.end(); iter++)
     {
@@ -227,7 +127,7 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
 
 Task::Task(std::string task_name, int period, int deadline, int wcet,
             int bcet, int offset, bool is_read, bool is_write, int ecu_id,
-            std::vector<std::shared_ptr<Task>> prodcuers, std::vector<std::shared_ptr<Task>> consumers, PriorityPolicy policy)
+            std::vector<std::shared_ptr<Task>> prodcuers, std::vector<std::shared_ptr<Task>> consumers)
 {
     /**
      * Member variable initializaion
@@ -243,11 +143,6 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
     m_is_write = is_write;
     m_producers = prodcuers;
     m_consumers = consumers;
-    m_priority_policy = policy;
-    m_is_gpu_init = false;
-    m_is_gpu_sync = false;
-    m_gpu_wait_time = 0;
-    penalty = false;
     
     for(auto iter = vectors::ecu_vector.begin(); iter != vectors::ecu_vector.end(); iter++)
     {
@@ -316,21 +211,6 @@ int Task::get_vector_idx()
     return m_vector_idx;
 }
 
-int Task::get_gpu_wait_time()
-{
-    return m_gpu_wait_time;
-}
-
-void Task::set_simulated_gpu_wait_time(double time)
-{
-    this->m_simulated_gpu_wait_time = time;
-}
-
-double Task::get_simulated_gpu_wait_time()
-{
-    return this->m_simulated_gpu_wait_time;
-}
-
 /**
  * @fn int get_period()
  * @brief Getter for task period
@@ -365,16 +245,6 @@ int Task::get_period()
 int Task::get_deadline()
 {
     return m_deadline;
-}
-
-PriorityPolicy Task::get_priority_policy()
-{
-    return m_priority_policy;
-}
-
-void Task::set_priority_policy(PriorityPolicy priority_policy)
-{
-    this->m_priority_policy = priority_policy;
 }
 
 /**
@@ -494,29 +364,9 @@ std::vector<std::string> Task::get_consumers_info()
     return m_consumers_info;
 }
 
-bool Task::get_is_gpu_init()
-{
-    return m_is_gpu_init;
-}
-
-bool Task::get_is_gpu_sync()
-{
-    return m_is_gpu_sync;
-}
-
 /**
  * Setter member functions
  */
-
-void Task::set_is_gpu_init(bool is_init)
-{
-    this->m_is_gpu_init = is_init;
-}
-
-void Task::set_is_gpu_sync(bool is_sync)
-{
-    this->m_is_gpu_sync = is_sync;
-}
 
 void Task::set_task_name(std::string task_name)
 {
@@ -534,11 +384,6 @@ void Task::set_vector_idx(int vector_idx)
 void Task::set_period(int period)
 {
     m_period = period;
-}
-
-void Task::set_gpu_wait_time(int time)
-{
-    m_gpu_wait_time = time;
 }
 
 void Task::set_deadline(int deadline)

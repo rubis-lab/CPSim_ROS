@@ -20,7 +20,7 @@
  * @file Task.h
  * @class Task
  * @author Seonghyeon Park
- * @date 2020-08-18
+ * @date 2020-08-19
  * @brief 
  *  Task's Properties
  *  A Task has below properties.
@@ -40,16 +40,6 @@ public:
 	void (*m_casted_func)(); // Not sure if this would be same type on windows or not..
 	int* shared_variable;
 private:
-	
-	// if it is NOT:
-	// Then wrap this variable like this:
-	//#ifdef __linux__
-	//void (*m_casted_func)(char*);
-	//#elif _WIN32
-	// ..windows variable decl..
-	//#else
-	//#error "OS not recognised."
-	//#endif
 
 	std::chrono::steady_clock::time_point m_run_start;
 	std::chrono::steady_clock::time_point m_run_end;
@@ -66,10 +56,6 @@ private:
 	bool m_is_read;
 	bool m_is_write;
 
-	int m_gpu_wait_time; // TIME RESERVED FOR EXECUTION ON GPU SIDE (WCET) .... (WAIT TIME BETWEEN INIT AND SYNC.)
-	double m_simulated_gpu_wait_time;
-	bool m_is_gpu_init;
-	bool m_is_gpu_sync;
 	std::shared_ptr<ECU> m_ecu;
 	std::vector<std::string> m_producers_info;
 	std::vector<std::string> m_consumers_info;
@@ -82,10 +68,10 @@ public:
      */
 	Task();
 	// name, period, deadline, wcet, bcet, offset, isRead, isWrite, ecuId
-	Task(std::string, int, int, int, int, int, bool, bool, int, PriorityPolicy policy = PriorityPolicy::CPU);
+	Task(std::string, int, int, int, int, int, bool, bool, int);
 
-	Task(std::string, int, int, int, int, int, bool, bool, int, std::vector<std::string>, std::vector<std::string>, PriorityPolicy policy = PriorityPolicy::CPU);
-	Task(std::string, int, int, int, int, int, bool, bool, int, std::vector<std::shared_ptr<Task>>, std::vector<std::shared_ptr<Task>>, PriorityPolicy policy = PriorityPolicy::CPU);
+	Task(std::string, int, int, int, int, int, bool, bool, int, std::vector<std::string>, std::vector<std::string>);
+	Task(std::string, int, int, int, int, int, bool, bool, int, std::vector<std::shared_ptr<Task>>, std::vector<std::shared_ptr<Task>>);
 	~Task();
 
     /**
@@ -120,7 +106,6 @@ public:
     /**
      * Setter member functions
      */
-	void set_priority_policy(PriorityPolicy priority_policy);
 	void set_task_name(std::string task_name);
 	void set_task_id(int task_id);
 	void set_vector_idx(int vector_idx);
@@ -131,10 +116,6 @@ public:
 	void set_offset(int offset);
 	void set_is_read(bool is_read);
 	void set_is_write(bool is_write);
-	void set_is_gpu_init(bool is_init);
-	void set_is_gpu_sync(bool is_sync);
-	void set_gpu_wait_time(int time);
-	void set_simulated_gpu_wait_time(double time);
 
 	void set_producers(std::vector<std::shared_ptr<Task>>);
 	void set_consumers(std::vector<std::shared_ptr<Task>>);
@@ -146,18 +127,6 @@ public:
 	void add_task_to_consumers(std::shared_ptr<Task>);
 	void add_task_to_producers(std::shared_ptr<Task>);
 	void synchronize_producer_consumer_relation();
-
-	// If these 2 funcs are different for windows / linux, wrap them like this:
-//#ifdef __linux__
-// .. function decls
-//#elif _WIN32
-// .. funciton decls
-//#else
-//#error "OS not recognised."
-//#endif
-	void loadFunction(std::string file_path, std::string function_name);
-	void run();
-
 };
 
 #endif
