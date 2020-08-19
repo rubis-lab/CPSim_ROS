@@ -1,6 +1,12 @@
 # CPSIM_ROS2
-# Created by Seonghyeon Park, Charles Onyango
+
 
 ```
-this project support synthetic workload mode. 2020-08-19
+this project support synthetic workload mode
+this project support fixed execution time mode
+
+future work : varying execution time mode
+
+created by RUBIS
+developers: Seonghyeon Park, Jin Choi, Alex, Charles 
 ```
