@@ -53,6 +53,8 @@ private:
 	int m_bcet;
 	int m_offset;
 	int m_priority;
+	int m_type;
+	
 	bool m_is_read;
 	bool m_is_write;
 
@@ -91,13 +93,9 @@ public:
 	int get_bcet();
 	int get_offset();
 	int get_priority();
-	int get_gpu_wait_time();
-	double get_simulated_gpu_wait_time();
 	bool get_is_read();
 	bool get_is_write();
-	bool get_is_gpu_init();
-	bool get_is_gpu_sync();
-	
+
 	std::vector<std::shared_ptr<Task>> get_producers();
 	std::vector<std::shared_ptr<Task>> get_consumers();
 	std::vector<std::string> get_producers_info();

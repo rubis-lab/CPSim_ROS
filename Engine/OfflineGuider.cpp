@@ -89,7 +89,6 @@ void OfflineGuider::construct_start_job_sets(int ecu_id, std::shared_ptr<Job>& c
 {
     current_job->get_job_set_start_det().clear(); // Reset.
     current_job->get_job_set_start_non_det().clear(); // Reset.
-    if (current_job->get_priority_policy() == PriorityPolicy::GPU) return; // GPU Jobs have enforced determinism.
     for(int task_id =0; task_id < vectors::job_vectors_for_each_ECU.at(ecu_id).size(); ++ task_id)
     for (auto job : vectors::job_vectors_for_each_ECU.at(ecu_id).at(task_id))
     {
@@ -107,7 +106,6 @@ void OfflineGuider::construct_finish_job_sets(int ecu_id, std::shared_ptr<Job>& 
 {
     current_job->get_job_set_finish_det().clear(); // Reset.
     current_job->get_job_set_finish_non_det().clear(); // Reset.
-    if (current_job->get_priority_policy() == PriorityPolicy::GPU) return; // GPU Jobs have enforced determinism.
     for(int task_id =0; task_id < vectors::job_vectors_for_each_ECU.at(ecu_id).size(); ++ task_id)
     for (auto job : vectors::job_vectors_for_each_ECU.at(ecu_id).at(task_id))
     {
@@ -142,7 +140,7 @@ void OfflineGuider::construct_producer_job_sets(int ecu_id, std::shared_ptr<Job>
                 for(int task_id =0; task_id < vectors::job_vectors_for_each_ECU.at(i).size(); ++ task_id)
                     for (auto job : vectors::job_vectors_for_each_ECU.at(i).at(task_id))
                     {
-                        if (job->get_task_name() == producer->get_task_name() && !job->get_is_gpu_sync()) // In Control System Design, this producer job is a producer of job.
+                        if (job->get_task_name() == producer->get_task_name()) // In Control System Design, this producer job is a producer of job.
                         {
                             if ((job->get_lft() <= current_job->get_est())) // where max(tFreali') < min < max
                             {
@@ -163,18 +161,6 @@ void OfflineGuider::construct_producer_job_sets(int ecu_id, std::shared_ptr<Job>
         current_job->get_job_set_pro_con_det().push_back(job);
     for (auto job : current_job->get_job_set_start_non_det()) // Empty for GPU jobs.
         current_job->get_job_set_pro_con_non_det().push_back(job);
-    if (current_job->get_is_gpu_sync())
-    {
-        for(int task_id =0; task_id < vectors::job_vectors_for_each_ECU.at(current_job->get_ECU()->get_ECU_id()).size(); ++ task_id)
-        for (auto job : vectors::job_vectors_for_each_ECU.at(current_job->get_ECU()->get_ECU_id()).at(task_id))
-        {
-            if (job->get_job_id() == current_job->get_job_id() && job->get_task_id() == current_job->get_task_id() && job->get_is_gpu_init())
-            {
-                deterministic_producer = job; // GPU Sync jobs will only add their GPU Init job.
-                break;
-            }
-        }
-    }
     if (deterministic_producer != nullptr)
         current_job->get_job_set_pro_con_det().push_back(deterministic_producer);
 }

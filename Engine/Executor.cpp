@@ -185,25 +185,6 @@ bool Executor::run_simulation(double start_time)
             }
             
 
-            /**
-             * If, this is a real mode simulator, use actual function code of task
-             * Else, this is synthetic work
-             
-             , so that we just add simulated execution time to current time;
-             */
-
-            if (utils::real_workload)
-            {
-                //starttime, get_ECUid: taskname, is started
-                
-                run_job->run();
-                // global_object::finished_job.push(run_job);
-                // Choose which one you think is best.
-                //utils::current_time += run_job->get_last_elapsed_nano_sec();
-                utils::current_time += run_job->get_last_elapsed_micro_sec();
-                //utils::current_time += run_job->get_last_elapsed_milli_sec();
-                //utils::current_time += run_job->get_last_elapsed_seconds();
-            }
             else utils::current_time += run_job->get_simulated_execution_time();
             for(int i = 0; i < simulation_ready_queue.size(); i++)
             {
@@ -226,38 +207,6 @@ void Executor::change_execution_time()
     for (auto job : vectors::job_vector_of_simulator)
     {
         job->set_simulated_execution_time(job->get_actual_execution_time() * utils::simple_mapping_function);
-        if(utils::execute_gpu_jobs_on_cpu)
-        {
-            if(job->penalty) // This job was a GPU job on the real system.
-            {
-                double exec = job->get_gpu_wait_time() + 2;
-                exec *= utils::simple_gpu_mapping_function;
-                exec *= utils::simple_mapping_function;
-                job->set_simulated_execution_time(exec);
-                //job->set_simulated_execution_time(job->get_simulated_execution_time() * utils::simple_gpu_mapping_function);
-            }
-        }
-        else if (job->get_priority_policy() == PriorityPolicy::GPU)
-        {
-            //double execution_time_mapping_factor = (double)job->get_ECU()->get_gpu_performance() / utils::simulatorGPU_performance;
-            //job->set_simulated_execution_time(job->get_actual_execution_time() * execution_time_mapping_factor);
-            //job->set_simulated_gpu_wait_time(job->get_gpu_wait_time() * utils::simple_gpu_mapping_function);
-            job->set_simulated_gpu_wait_time(job->get_gpu_wait_time() * utils::simple_mapping_function);
-            if(utils::execute_gpu_jobs_on_cpu)
-            {
-                job->set_simulated_gpu_wait_time(job->get_simulated_gpu_wait_time() * utils::simple_gpu_mapping_function);
-                // GPU Wait Time causes an issue here.
-                // As it let's CPU run jobs "concurrently"..
-                // Let's perform a dirty quick fix for this.
-                // We shouldn't actually let other cpu jobs run during gpu wait time here unless they are higher priority.
-                if(job->get_is_gpu_init())
-                {
-                    // make sure the job actually occupies all the time it should when GPU is not available for simulator pc.
-                    job->set_simulated_execution_time(job->get_simulated_gpu_wait_time() + job->get_simulated_execution_time());
-                }
-                //job->set_simulated_gpu_wait_time(job->get_gpu_wait_time() * utils::simple_gpu_mapping_function);
-            }
-        }
     }
 }
 
@@ -395,48 +344,13 @@ void Executor::assign_predecessors_successors()
             }
         }
     }
-
-    // Make sure Sync job's dont start too fast. (Add Virtual GPU Job).
-    for (auto job : vectors::job_vector_of_simulator)
-    {
-        if (!job->get_is_gpu_sync()) continue;
-        if (job->get_det_prdecessors().size() > 0) continue;
-        std::cout << "Adding virtual job" << std::endl;
-        // We are a sync job with no predecessors left.
-        // Make sure that we can't be released until GPU Wait Time has occured.
-
-        // Get the simulated finish time of our corresponding Init job.
-        double init_finish_time; // Left uninitialized to catch if there is a logic error somewhere in task construction.
-        bool init_finished = false;
-        for (auto init : vectors::job_vector_of_simulator)
-        {
-            if (!init->get_is_gpu_init()) continue;
-            if (init->get_task_id() && job->get_task_id() && init->get_job_id() == job->get_job_id())
-            {
-                init_finish_time = init->get_simulated_finish_time();
-                if(init->get_is_simulated())
-                    init_finished = true;
-                break;
-            }
-        }
-        double essta = init_finish_time + job->get_simulated_gpu_wait_time(); // earliest simulated start time allowed
-        if (utils::current_time < essta || !init_finished)
-        {
-            //std::cout << "ADDING VIRTUAL JOB TOD DELAY SYNC" << std::endl;
-            job->get_det_prdecessors().push_back(std::make_shared<Job>()); // Add virtual job to prevent sync from starting.
-            job->set_simulated_release_time(essta);
-        }
-    }
 }
 
 void Executor::random_execution_time_generator()
 {
     for(auto job : vectors::job_vector_of_simulator)
     {
-        if (job->get_priority_policy() == PriorityPolicy::GPU)
-            job->set_actual_execution_time(job->get_wcet());
-        else
-            job->set_actual_execution_time((rand() % (job->get_wcet()-job->get_bcet()+1) + job->get_bcet()));
+        job->set_actual_execution_time((rand() % (job->get_wcet()-job->get_bcet()+1) + job->get_bcet()));
     }
 }
 

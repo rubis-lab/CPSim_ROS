@@ -30,6 +30,7 @@
 /**
     Header file lists.. in our simulator
 */
+#include "ScheduleGenerator.h"
 #include "Initializer.h"
 #include "OfflineGuider.h"
 #include "Executor.h"
@@ -78,9 +79,9 @@ int main(int argc, char *argv[])
         }
         else
         {
-            initializer_module.initialize(utils::null_path);
+            initializer_module.initialize("\0");
         }
-         ScheduleSimulator schedule_simulator_on_Real;
+         ScheduleGenerator schedule_generator;
          OfflineGuider offline_guider;
          Executor executor;
 
@@ -107,7 +108,7 @@ int main(int argc, char *argv[])
               * forth, we need to schedule those jobs' that is already inserted in the Job Precedence Graph.
               * For this, we create executor which is responsible for 
              */
-            schedule_simulator_on_Real.simulate_scheduling_on_real(utils::current_time);
+            schedule_generator.simulate_scheduling_on_real(utils::current_time);
             offline_guider.construct_job_precedence_graph();
             is_simulatable = executor.run_simulation(utils::current_time);
             vectors::job_vector_of_simulator.clear();
@@ -120,7 +121,6 @@ int main(int argc, char *argv[])
         if(utils::real_workload == false)
         {
             // Reset Globals
-            global_object::logger_thread = nullptr; // Removing logger_thread first as it holds a reference to logger func.
             global_object::logger = nullptr;
             global_object::gld_vector.clear();
             
@@ -144,6 +144,5 @@ int main(int argc, char *argv[])
         std::cout << "Simulatability ratio is " << simulatable_count / (double)(simulatable_count + nonsimulatable_count) << std::endl;
         std::cout << "--------------------" << std::endl;
     }        
-    global_object::logger_thread->join();
     return 0;
 }

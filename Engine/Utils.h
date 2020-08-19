@@ -28,21 +28,13 @@
 
 namespace utils
 {
-    inline std::string file_path = "/home/";
-    inline std::string null_path = "";
-    inline std::string cpsim_path = "";
     inline int hyper_period = 0;
     inline double current_time = 0; //simulation time(us)
     inline int number_of_ECUs = 0;
     inline int number_of_tasks = 0;
-    inline int simulatorPC_performance = 3000;
-    inline int task_amount = 10;
-    extern int shared_variable;
      
     inline double simple_mapping_function = 0.3;
 
-    inline unsigned int ecu_counter = 0;
-    inline bool is_experimental = true;
     inline bool real_workload = true;
 
     int greatest_common_divider(int a, int b);
@@ -67,8 +59,6 @@ namespace global_object
     inline std::shared_ptr<Job> running_job;
     inline std::priority_queue<std::shared_ptr<Job>> finished_job;
     inline std::shared_ptr<Logger> logger;
-    inline std::shared_ptr<std::thread> logger_thread;
-
 
     typedef struct LogData
     {

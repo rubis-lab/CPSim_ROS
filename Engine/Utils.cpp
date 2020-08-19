@@ -145,32 +145,10 @@ int utils::calculate_hyper_period(std::vector<std::shared_ptr<Task>>& task_set)
  * @warning none
  * @todo none
  */
-void utils::insert_can_msg(std::shared_ptr<CAN_message> input)
-{
-	// first element
-	if (vectors::can_msg_vector.empty())
-	{
-		vectors::can_msg_vector.push_back(input);
-		return;
-	}
-
-	std::vector<std::shared_ptr<CAN_message>>::iterator iter;
-	for (iter = vectors::can_msg_vector.begin(); iter != vectors::can_msg_vector.end(); iter++)
-	{
-		if (iter->get()->get_time() > input.get()->get_time())
-		{
-			vectors::can_msg_vector.insert(iter, input);
-			return;
-		}
-	}
-	vectors::can_msg_vector.push_back(input);		// push target to the last position
-}
 
 void utils::exit_simulation(int signo)
 {
 	std::cout << "Simulation End\n" << std::endl;
-	CAN_Close(can::hCAN1);
-	global_object::logger_thread->detach();
 	exit(signo);
 }
 

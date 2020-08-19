@@ -78,7 +78,7 @@ void Initializer::initialize(std::string location)
         /**
          * Task Vector Initialization
          */
-        random_task_generator(0.3, 0.3, (rand() % 5 + 1) * vectors::ecu_vector.size());
+        random_task_generator(10);
 
         /**
          * Each task can be [0-2] data producer of random selected job.
@@ -178,13 +178,10 @@ void Initializer::random_task_generator(int task_num)
         vectors::ecu_vector.at(ecu_id)->set_num_of_task(min_num + 1);
 
         //Task Name(id), period, deadline, wcet, bcet, offset, read, write, ecu, producer, consumers
-        if (!is_gpu_task)
-        {
-            std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, wcet, bcet, offset, is_read, is_write, ecu_id, producers, consumers);
-            task->loadFunction("/lib/x86_64-linux-gnu/libc.so.6", "puts");
-            task->set_priority_policy(PriorityPolicy::CPU);
-            vectors::task_vector.push_back(std::move(task));
-        }
+
+        std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, wcet, bcet, offset, is_read, is_write, ecu_id, producers, consumers);
+        vectors::task_vector.push_back(std::move(task));
+        
     }
     // What is this?
     for(int ecu_num =0; ecu_num < vectors::ecu_vector.size(); ecu_num++)
@@ -233,12 +230,7 @@ void Initializer::random_producer_consumer_generator()
 
 void Initializer::random_constraint_selector(double read_ratio, double write_ratio)
 {
-    // Using vector.size() will give an inflated number if GPU jobs exists.
-    // As GPU tasks count as 2, the task_num becomes inflated.
-    // If we originally have X tasks, the inflation will be:
-    // (2X * gpu_ratio) + (X * 1 - gpu_ratio) = Z, where Z is the inflated task number and vector size.
-    int task_num = utils::task_amount; //vectors::task_vector.size();
-
+    int task_num = vectors::task_vector.size();
     int number_of_read = std::ceil(read_ratio * task_num); //read ratio is 30%
     int number_of_write = std::ceil(write_ratio * task_num); //write ratio is 30%
 
@@ -246,7 +238,7 @@ void Initializer::random_constraint_selector(double read_ratio, double write_rat
     while(number_of_read != 0)
     {
         selector = rand() % vectors::task_vector.size();                                                   // Sync jobs can only read from Init jobs (gpu wait time).
-        if(vectors::task_vector.at(selector)->get_is_read() == true || vectors::task_vector.at(selector)->get_is_gpu_sync())
+        if(vectors::task_vector.at(selector)->get_is_read() == true)
         {
             continue;
         }
@@ -261,7 +253,7 @@ void Initializer::random_constraint_selector(double read_ratio, double write_rat
     while(number_of_write != 0)
     {
         selector = rand() % vectors::task_vector.size();                                                                    // Init jobs only write to the gpu.
-        if(vectors::task_vector.at(rand() % vectors::task_vector.size())->get_is_write() == true || vectors::task_vector.at(selector)->get_is_gpu_init())
+        if(vectors::task_vector.at(rand() % vectors::task_vector.size())->get_is_write() == true)
         {
             continue;
         }

@@ -10,7 +10,7 @@
  *  This file is the header file for the Job class.
  *  @file Job.h
  *  @author Seonghyeon Park
- *  @date 2020-08-18 
+ *  @date 2020-08-19
  *  @class Job
  *  @brief Header file for Engine-Job
  *  A job is the instance of certain task.
