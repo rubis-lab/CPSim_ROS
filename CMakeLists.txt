@@ -23,6 +23,8 @@ SET ( SRC_FILES
         Engine/Logger.h Engine/Logger.cpp
         # set offline_guider files
         Engine/OfflineGuider.h Engine/OfflineGuider.cpp
+        # set ScheduleGenerator files
+        Engine/ScheduleGenerator.h Engine/ScheduleGenerator.cpp 
         # set Executor files
         Engine/Executor.h Engine/Executor.cpp 
         # set ECU files

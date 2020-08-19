@@ -21,6 +21,11 @@
 },
 {
   "directory": "/home/park/git_base/CPSIM_ROS2/build",
+  "command": "/usr/bin/g++-7    -g   -std=c++1z -o CMakeFiles/CPSim-0.1.out.dir/Engine/ScheduleGenerator.cpp.o -c /home/park/git_base/CPSIM_ROS2/Engine/ScheduleGenerator.cpp",
+  "file": "/home/park/git_base/CPSIM_ROS2/Engine/ScheduleGenerator.cpp"
+},
+{
+  "directory": "/home/park/git_base/CPSIM_ROS2/build",
   "command": "/usr/bin/g++-7    -g   -std=c++1z -o CMakeFiles/CPSim-0.1.out.dir/Engine/Executor.cpp.o -c /home/park/git_base/CPSIM_ROS2/Engine/Executor.cpp",
   "file": "/home/park/git_base/CPSIM_ROS2/Engine/Executor.cpp"
 },

@@ -310,6 +310,33 @@ Engine/OfflineGuider.cpp.s:
 	$(MAKE) -f CMakeFiles/CPSim-0.1.out.dir/build.make CMakeFiles/CPSim-0.1.out.dir/Engine/OfflineGuider.cpp.s
 .PHONY : Engine/OfflineGuider.cpp.s
 
+Engine/ScheduleGenerator.o: Engine/ScheduleGenerator.cpp.o
+
+.PHONY : Engine/ScheduleGenerator.o
+
+# target to build an object file
+Engine/ScheduleGenerator.cpp.o:
+	$(MAKE) -f CMakeFiles/CPSim-0.1.out.dir/build.make CMakeFiles/CPSim-0.1.out.dir/Engine/ScheduleGenerator.cpp.o
+.PHONY : Engine/ScheduleGenerator.cpp.o
+
+Engine/ScheduleGenerator.i: Engine/ScheduleGenerator.cpp.i
+
+.PHONY : Engine/ScheduleGenerator.i
+
+# target to preprocess a source file
+Engine/ScheduleGenerator.cpp.i:
+	$(MAKE) -f CMakeFiles/CPSim-0.1.out.dir/build.make CMakeFiles/CPSim-0.1.out.dir/Engine/ScheduleGenerator.cpp.i
+.PHONY : Engine/ScheduleGenerator.cpp.i
+
+Engine/ScheduleGenerator.s: Engine/ScheduleGenerator.cpp.s
+
+.PHONY : Engine/ScheduleGenerator.s
+
+# target to generate assembly for a file
+Engine/ScheduleGenerator.cpp.s:
+	$(MAKE) -f CMakeFiles/CPSim-0.1.out.dir/build.make CMakeFiles/CPSim-0.1.out.dir/Engine/ScheduleGenerator.cpp.s
+.PHONY : Engine/ScheduleGenerator.cpp.s
+
 Engine/Task.o: Engine/Task.cpp.o
 
 .PHONY : Engine/Task.o
@@ -420,6 +447,9 @@ help:
 	@echo "... Engine/OfflineGuider.o"
 	@echo "... Engine/OfflineGuider.i"
 	@echo "... Engine/OfflineGuider.s"
+	@echo "... Engine/ScheduleGenerator.o"
+	@echo "... Engine/ScheduleGenerator.i"
+	@echo "... Engine/ScheduleGenerator.s"
 	@echo "... Engine/Task.o"
 	@echo "... Engine/Task.i"
 	@echo "... Engine/Task.s"

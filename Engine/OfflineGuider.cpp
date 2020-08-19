@@ -1,5 +1,4 @@
 #include "OfflineGuider.h"
-#include "JobNode.h"
 #include <memory>
 
 /**
