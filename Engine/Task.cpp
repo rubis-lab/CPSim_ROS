@@ -39,9 +39,10 @@ Task::Task()
  * @param task_id
  * @param period
  * @param deadline
- * @param wcet
- * @param bcet
  * @param offset
+ * @param priority
+ * @param callback_type
+ * @param fixed_execution_time
  * @param is_read
  * @param is_write
  * @param producer
@@ -51,8 +52,8 @@ Task::Task()
  * @warning none
  * @todo none
  */
-Task::Task(std::string task_name, int period, int deadline, int wcet,
-            int bcet, int offset, bool is_read, bool is_write, int ecu_id)
+Task::Task(std::string task_name, int period, int deadline, int priority, int callback_type,
+            int fet, int offset, bool is_read, bool is_write, int ecu_id)
 {
     /**
      * Member variable initializaion
@@ -61,9 +62,10 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
     m_task_id = vectors::task_vector.size();
     m_period = period;
     m_deadline = deadline;
-    m_wcet = wcet;
-    m_bcet = bcet;
     m_offset = offset;
+    m_priority = priority;
+    m_callback_type = callback_type;
+    m_fet = fet;
     m_is_read = is_read;
     m_is_write = is_write;
 
@@ -76,29 +78,9 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
     }
 }
 
-long long Task::get_last_elapsed_nano_sec()
-{
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(m_run_end - m_run_start).count();
-}
-
-long long Task::get_last_elapsed_micro_sec()
-{
-    return std::chrono::duration_cast<std::chrono::microseconds>(m_run_end - m_run_start).count();
-}
-
-long long Task::get_last_elapsed_milli_sec()
-{
-    return std::chrono::duration_cast<std::chrono::milliseconds>(m_run_end - m_run_start).count();
-}
-
-long long Task::get_last_elapsed_seconds()
-{
-    return std::chrono::duration_cast<std::chrono::seconds>(m_run_end - m_run_start).count();
-}
-
-Task::Task(std::string task_name, int period, int deadline, int wcet,
-            int bcet, int offset, bool is_read, bool is_write, int ecu_id,
-            std::vector<std::string> prodcuers, std::vector<std::string> consumers)
+Task::Task(std::string task_name, int period, int deadline, int priority, int callback_type,
+            int fet, int offset, bool is_read, bool is_write, int ecu_id,
+            std::string prodcuer, std::string consumer)
 {
     /**
      * Member variable initializaion
@@ -108,13 +90,11 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
     //m_task_id = std::stoi(m_task_name.substr(4));
     m_period = period;
     m_deadline = deadline;
-    m_wcet = wcet;
-    m_bcet = bcet;
     m_offset = offset;
     m_is_read = is_read;
     m_is_write = is_write;
-    m_producers_info = prodcuers;
-    m_consumers_info = consumers;
+    m_producer_info = prodcuer;
+    m_consumer_info = consumer;
     
     for(auto iter = vectors::ecu_vector.begin(); iter != vectors::ecu_vector.end(); iter++)
     {
@@ -125,9 +105,9 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
     }
 }
 
-Task::Task(std::string task_name, int period, int deadline, int wcet,
-            int bcet, int offset, bool is_read, bool is_write, int ecu_id,
-            std::vector<std::shared_ptr<Task>> prodcuers, std::vector<std::shared_ptr<Task>> consumers)
+Task::Task(std::string task_name, int period, int deadline, int priority, int callback_type,
+            int fet, int offset, bool is_read, bool is_write, int ecu_id,
+            std::shared_ptr<Task> prodcuer, std::shared_ptr<Task> consumer)
 {
     /**
      * Member variable initializaion
@@ -136,13 +116,11 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
     m_task_id = vectors::task_vector.size();
     m_period = period;
     m_deadline = deadline;
-    m_wcet = wcet;
-    m_bcet = bcet;
     m_offset = offset;
     m_is_read = is_read;
     m_is_write = is_write;
-    m_producers = prodcuers;
-    m_consumers = consumers;
+    m_producer = prodcuer;
+    m_consumer = consumer;
     
     for(auto iter = vectors::ecu_vector.begin(); iter != vectors::ecu_vector.end(); iter++)
     {
@@ -157,7 +135,7 @@ Task::Task(std::string task_name, int period, int deadline, int wcet,
  * @fn Task::~Task()
  * @brief the function of basic destructor of Task
  * @author Seonghyeon Park
- * @date 2020-04-01
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -175,7 +153,7 @@ Task::~Task()
  * @fn std::string get_task_name()
  * @brief Getter for task name
  * @author Seonghyeon Park
- * @date 2020-04-17
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -193,7 +171,7 @@ std::string Task::get_task_name()
  * @fn int get_task_id()
  * @brief Getter for task ID
  * @author Seonghyeon Park
- * @date 2020-04-17
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -215,7 +193,7 @@ int Task::get_vector_idx()
  * @fn int get_period()
  * @brief Getter for task period
  * @author Seonghyeon Park
- * @date 2020-04-17
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -233,7 +211,7 @@ int Task::get_period()
  * @fn int get_deadline()
  * @brief Getter for task deadline
  * @author Seonghyeon Park
- * @date 2020-04-17
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -248,46 +226,10 @@ int Task::get_deadline()
 }
 
 /**
- * @fn int get_wcet()
- * @brief Getter for task's worst case execution time
- * @author Seonghyeon Park
- * @date 2020-04-17
- * @details 
- *  - None
- * @param none
- * @return Task worst case execution time
- * @bug none
- * @warning none
- * @todo none
- */
-int Task::get_wcet()
-{
-    return m_wcet;
-}
-
-/**
- * @fn int get_bcet()
- * @brief Getter for task's best case execution time
- * @author Seonghyeon Park
- * @date 2020-04-17
- * @details 
- *  - None
- * @param none
- * @return Task best case execution time
- * @bug none
- * @warning none
- * @todo none
- */
-int Task::get_bcet()
-{
-    return m_bcet;
-}
-
-/**
  * @fn int get_offset()
  * @brief Getter for task's offset
  * @author Seonghyeon Park
- * @date 2020-04-17
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -305,11 +247,21 @@ int Task::get_priority()
 {
     return m_priority;    
 }
+
+int Task::get_callback_type()
+{
+    return m_callback_type;    
+}
+
+int Task::get_fet()
+{
+    return m_fet;    
+}
 /**
  * @fn int get_is_read()
  * @brief Getter for task's read constraint
  * @author Seonghyeon Park
- * @date 2020-04-17
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -327,7 +279,7 @@ bool Task::get_is_read()
  * @fn int get_is_write()
  * @brief Getter for task's write constraint
  * @author Seonghyeon Park
- * @date 2020-04-17
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -346,22 +298,22 @@ std::shared_ptr<ECU> Task::get_ECU()
     return m_ecu;
 }
 
-std::vector<std::shared_ptr<Task>> Task::get_producers()
+std::shared_ptr<Task> Task::get_producer()
 {
-    return m_producers;
+    return m_producer;
 }
 
-std::vector<std::shared_ptr<Task>> Task::get_consumers()
+std::shared_ptr<Task> Task::get_consumer()
 {
-    return m_consumers;
+    return m_consumer;
 }
-std::vector<std::string> Task::get_producers_info()
+std::string Task::get_producer_info()
 {
-    return m_producers_info;
+    return m_producer_info;
 }
-std::vector<std::string> Task::get_consumers_info()
+std::string Task::get_consumer_info()
 {
-    return m_consumers_info;
+    return m_consumer_info;
 }
 
 /**
@@ -390,14 +342,7 @@ void Task::set_deadline(int deadline)
 {
     m_deadline = deadline;
 }
-void Task::set_wcet(int wcet)
-{
-    m_wcet = wcet;
-}
-void Task::set_bcet(int bcet)
-{
-    m_bcet = bcet;
-}
+
 void Task::set_offset(int offset)
 {
     m_offset = offset;
@@ -414,22 +359,30 @@ void Task::set_priority(int priority)
 {
     m_priority = priority;
 }
+void Task::set_callback_type(int type)
+{
+    m_callback_type = type;
+}
+void Task::set_fet(int fet)
+{
+    m_fet = fet;
+}
 
-void Task::set_producers(std::vector<std::shared_ptr<Task>> producers)
+void Task::set_producer(std::shared_ptr<Task> producer)
 {
-    m_producers = producers;
+    m_producer = producer;
 }
-void Task::set_consumers(std::vector<std::shared_ptr<Task>> consumers)
+void Task::set_consumer(std::shared_ptr<Task> consumer)
 {
-    m_consumers = consumers;
+    m_consumer = consumer;
 }
-void Task::set_producers_info(std::vector<std::string> producers_info)
+void Task::set_producer_info(std::string producer_info)
 {
-    m_producers_info = producers_info;
+    m_producer_info = producer_info;
 }
-void Task::set_consumers_info(std::vector<std::string> consumers_info)
+void Task::set_consumer_info(std::string consumer_info)
 {
-    m_consumers_info = consumers_info;
+    m_consumer_info = consumer_info;
 }
 void Task::set_ECU(std::shared_ptr<ECU> ecu)
 {
@@ -438,57 +391,42 @@ void Task::set_ECU(std::shared_ptr<ECU> ecu)
 
 void Task::synchronize_producer_consumer_relation()
 {
-    if(m_producers_info.size() != 0)
-        for(auto producer : m_producers_info)
+    for(auto task : vectors::task_vector)
+        if(task->get_task_name() == m_producer_info)
         {
-            for(auto task : vectors::task_vector)
-            {
-                if(task->get_task_name() == producer)
-                {
-                    m_producers.push_back(task); 
-                }
-            }
-        }
+            m_producer = task;
+        } 
         
-    if(m_consumers_info.size() != 0)
-        for(auto consumer : m_consumers_info)
-        {
-            for(auto task : vectors::task_vector)
-            {
-                if(task->get_task_name() == consumer)
-                {       
-                    m_consumers.push_back(task);
-                    break; 
-                }
-            }
+
+    for(auto task : vectors::task_vector)
+        if(task->get_task_name() == m_consumer_info)
+        {       
+            m_consumer = task;
+            break; 
         }
 }
 
-void Task::add_task_to_consumers(std::shared_ptr<Task> task)
+void Task::add_task_to_consumer(std::shared_ptr<Task> task)
 {
     bool is_overlapped = false;
-    for(auto consumer : m_consumers)
+
+    if(m_consumer == task)
     {
-        if(consumer == task)
-        {
-            is_overlapped = true;
-            break;
-        }
+        is_overlapped = true;
     }
+    
     if(is_overlapped == false)
-        m_consumers.push_back(task);
+        m_consumer = task;
 }
-void Task::add_task_to_producers(std::shared_ptr<Task> task)
+void Task::add_task_to_producer(std::shared_ptr<Task> task)
 {
     bool is_overlapped = false;
-    for(auto producer : m_producers)
+    
+    if(m_producer == task)
     {
-        if(producer == task)
-        {
-            is_overlapped = true;
-            break;
-        }
+        is_overlapped = true;
     }
+    
     if(is_overlapped == false)
-        m_producers.push_back(task);
+        m_producer = task;
 }

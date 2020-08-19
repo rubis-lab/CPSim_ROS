@@ -78,7 +78,7 @@ void Initializer::initialize(std::string location)
         /**
          * Task Vector Initialization
          */
-        random_task_generator(10);
+        random_transaction_generator(10);
 
         /**
          * Each task can be [0-2] data producer of random selected job.
@@ -183,7 +183,7 @@ void Initializer::random_task_generator(int task_num)
         vectors::task_vector.push_back(std::move(task));
         
     }
-    // What is this?
+    // Creating vector spaces.
     for(int ecu_num =0; ecu_num < vectors::ecu_vector.size(); ecu_num++)
     {
         for(int i = 0; i < task_num; i++)

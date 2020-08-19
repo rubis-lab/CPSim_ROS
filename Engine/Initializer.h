@@ -27,6 +27,7 @@ public:
     Initializer();
     ~Initializer();
 
+    void random_transaction_generator(int); //this function is for experiments.
     void random_task_generator(int); // this function is for experiments.
     void random_ecu_generator(int); // this function is for experiments.
     void random_producer_consumer_generator();
