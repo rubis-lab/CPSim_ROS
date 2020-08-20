@@ -9,7 +9,7 @@
  *  @file Job.cpp
  *  @brief cpp file for Engine-Job
  *  @author Seonghyeon Park
- *  @date 2020-03-31
+ *  @date 2020-08-20
  *  
  */
 
@@ -17,7 +17,7 @@
  * @fn Job::Job()
  * @brief the function of basic constructor of Job
  * @author Seonghyeon Park
- * @date 2020-04-01
+ *  @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -35,7 +35,7 @@ Job::Job()
  * @fn Job::Job()
  * @brief the function of basic constructor of Job
  * @author Seonghyeon Park
- * @date 2020-04-01
+ *  @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -50,20 +50,24 @@ Job::Job(std::shared_ptr<Task> task, int job_id, int hyper_period_start)
     this->set_task_name(task->get_task_name());
     this->set_period(task->get_period());
     this->set_deadline(task->get_deadline());
-    this->set_wcet(task->get_wcet());
-    this->set_bcet(task->get_bcet());
     this->set_offset(task->get_offset());
+    this->set_priority(task->get_priority());
+    this->set_callback_type(task->get_callback_type());
+    this->set_fet(task->get_fet());
     this->set_is_read(task->get_is_read());
     this->set_is_write(task->get_is_write());
     this->set_ECU(task->get_ECU());
-    this->set_producers(task->get_producers());
-    this->set_consumers(task->get_consumers());
-    this->set_priority(task->get_priority());
+    this->set_producer(task->get_producer());
+    this->set_consumer(task->get_consumer());
+
     
     m_job_id = job_id;
-    m_actual_release_time = calculate_release_time(task->get_period(), task->get_offset(), hyper_period_start);
-    m_actual_deadline = calculate_absolute_deadline(m_actual_release_time, task->get_deadline());
-    m_actual_start_time = INT_MAX;
+    if(task->get_callback_type() == 0) //timer callback 
+        m_real_release_time = calculate_release_time(task->get_period(), task->get_offset(), hyper_period_start);
+    else
+        m_real_release_time = -1;
+    m_real_deadline = -1;
+    m_real_start_time = -1;
     m_simulated_release_time = -1;
     m_simulated_start_time = -1;
     m_simulated_finish_time = -1;
@@ -73,7 +77,7 @@ Job::Job(std::shared_ptr<Task> task, int job_id, int hyper_period_start)
  * @fn Job::~Job()
  * @brief the function of basic destroyer of Job
  * @author Seonghyeon Park
- * @date 2020-04-01
+ *  @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -119,55 +123,27 @@ int Job::get_job_id()
     return m_job_id;
 }
 
-int Job::get_actual_release_time()
+int Job::get_real_release_time()
 {
-    return m_actual_release_time;
+    return m_real_release_time;
 }
-int Job::get_actual_deadline()
+int Job::get_real_deadline()
 {
-    return m_actual_deadline;
+    return m_real_deadline;
 }
-int Job::get_actual_start_time()
+int Job::get_real_start_time()
 {
-    return m_actual_start_time;
+    return m_real_start_time;
 }
 
-int Job::get_actual_finish_time()
+int Job::get_real_finish_time()
 {
-    return m_actual_finish_time;
+    return m_real_finish_time;
 }  
 
-int Job::get_actual_execution_time()
+int Job::get_real_execution_time()
 {
-    return m_actual_execution_time;
-}
-
-int Job::get_est()
-{
-    return m_est;
-}
-
-int Job::get_lst()
-{
-    return m_lst;
-}
-
-int Job::get_eft()
-{
-    return m_eft;
-}
-
-int Job::get_lft()
-{
-    return m_lft;
-}
-int Job::get_bpet()
-{
-    return m_bpet;
-}
-int Job::get_wpet()
-{
-    return m_wpet;
+    return m_real_execution_time;
 }
 
 double Job::get_simulated_release_time()
@@ -271,51 +247,27 @@ void Job::set_is_simulated(bool is_simulated)
 {
     m_is_simulated = is_simulated;
 }
-void Job::set_est(int est)
+
+void Job::set_real_release_time(int release_time)
 {
-    m_est = est;
+    m_real_release_time = release_time;
 }
-void Job::set_lst(int lst)
+void Job::set_real_deadline(int a_deadline)
 {
-    m_lst = lst;
-}
-void Job::set_eft(int eft)
-{
-    m_eft = eft;
-}
-void Job::set_lft(int lft)
-{
-    m_lft = lft;
-}
-void Job::set_bpet(int bpet)
-{
-    m_bpet = bpet;
-}
-void Job::set_wpet(int wpet)
-{
-    m_wpet = wpet;
+    m_real_deadline = a_deadline;
 }
 
-void Job::set_actual_release_time(int release_time)
+void Job::set_real_start_time(int real_start_time)
 {
-    m_actual_release_time = release_time;
+    m_real_start_time = real_start_time;
 }
-void Job::set_actual_deadline(int a_deadline)
+void Job::set_real_finish_time(int real_finish_time)
 {
-    m_actual_deadline = a_deadline;
+    m_real_finish_time = real_finish_time;
 }
-
-void Job::set_actual_start_time(int actual_start_time)
+void Job::set_real_execution_time(int original_execution_time)
 {
-    m_actual_start_time = actual_start_time;
-}
-void Job::set_actual_finish_time(int actual_finish_time)
-{
-    m_actual_finish_time = actual_finish_time;
-}
-void Job::set_actual_execution_time(int original_execution_time)
-{
-    m_actual_execution_time = original_execution_time;
+    m_real_execution_time = original_execution_time;
 }
 
 void Job::set_simulated_release_time(double simulated_release_time)
@@ -404,7 +356,7 @@ void Job::initialize_simulated_deadline()
 {
     if(this->get_is_write())
     {
-        m_simulated_deadline = static_cast<double>(m_eft);
+        m_simulated_deadline = static_cast<double>(m_real_finish_time);
         if(m_simulated_deadline == 0)
         {
             //std::cout << "WE GOT A ZERO VALUE DEADLINE INSIDE THE INITIALIZE SIMULATED DEADLINE FUNCTION!" << std::endl;
@@ -422,7 +374,7 @@ void Job::update_simulated_deadline()
         if(this->get_is_write())
         {
             
-            m_simulated_deadline = static_cast<double>(m_eft);
+            m_simulated_deadline = static_cast<double>(m_real_finish_time);
             if(m_simulated_deadline == 0)
             {
                 //std::cout << "WE GOT A ZERO VALUE DEADLINE INSIDE THE UPDATE SIMULATED DEADLINE FUNCTION!" << std::endl;

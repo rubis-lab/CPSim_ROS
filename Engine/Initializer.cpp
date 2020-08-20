@@ -216,13 +216,10 @@ void Initializer::random_producer_consumer_generator()
     {
         for(auto consumer : vectors::task_vector)
         {
-            for(auto to_be_consumer : task->get_consumers_info())
+            if(consumer->get_task_name() == task->get_consumer_info())
             {
-                if(consumer->get_task_name() == to_be_consumer)
-                {
-                    task->add_task_to_consumers(consumer);
-                    consumer->add_task_to_producers(task);
-                }
+                task->add_task_to_consumer(consumer);
+                consumer->add_task_to_producer(task);
             }
         }    
     }    
