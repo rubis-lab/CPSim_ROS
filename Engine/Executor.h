@@ -59,7 +59,6 @@ public:
 
     void assign_deadline_for_simulated_jobs();
     void assign_predecessors_successors();
-    void assign_initial_actual_start_time();
     bool check_deadline_miss();
     bool simulatability_analysis();
 };

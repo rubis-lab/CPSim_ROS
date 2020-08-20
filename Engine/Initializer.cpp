@@ -27,7 +27,10 @@
  */
 Initializer::Initializer()
 {
-
+    m_10 = 0;
+    m_25 = 0;
+    m_50 = 0;
+    m_100 = 0;
 }
 
 /**
@@ -61,7 +64,7 @@ Initializer::~Initializer()
  * @warning none
  * @todo none
  */
-void Initializer::initialize(std::string location)
+void Initializer::initialize()
 {    
     if(utils::real_workload == true)
     {
@@ -74,17 +77,20 @@ void Initializer::initialize(std::string location)
          * number of ECU is [3-10]
          */
         random_ecu_generator((rand() % 8) + 3);
-        
+
         /**
          * Task Vector Initialization
          */
-        random_transaction_generator(10);
-
+        if(!random_transaction_generator(10, 10))
+            std::cout << "TASK NUMBER IS TOO MUCH" << std::endl;
         /**
          * Each task can be [0-2] data producer of random selected job.
          */
         random_constraint_selector(0.3, 0.3);
         random_producer_consumer_generator();
+
+        for(auto task : vectors::task_vector)
+            std::cout << task->get_period() << std::endl;
     }
                           
     
@@ -103,86 +109,6 @@ void Initializer::initialize(std::string location)
 
 void Initializer::random_task_generator(int task_num)
 {
-    for(int i = 0; i < task_num; i++)
-    {
-        //if(gpu_jobs > 0)
-            //std::cout << "We have " << gpu_jobs << " GPU jobs left to add." << std::endl;
-        std::string task_name = "TASK" + std::to_string(i);
-        bool is_gpu_task = false;
-        
-        int period = rand() % 100; //[10-100] milli sec.
-        if(period < 25)
-            period = 10;
-        else if(period < 50)
-            period = 20;
-        else if(period < 75)
-            period = 40;
-        else period = 80;
-        // Make sure period is large enough for GPU jobs so that we can have discrete sync / init execution times...
-        if (period < 40 && is_gpu_task) period = 80;
-        
-        int bcet = std::ceil(period * ((rand() % 6 + 5) * 0.01)); // [5-10] percent of period.
-        int wcet = ((rand() % 2) + 1) * (double)bcet;// [1.0-2.0] random variation factor multiply bcet
-        int offset = 0; //RTSS paper sets offset as 0.
-        bool is_read = false;
-        bool is_write = false;
-        int ecu_id = rand() % vectors::ecu_vector.size();
-        
-        //each task can be data producer of [0-2] randomly selected task.
-        std::vector<std::string> producers;
-        std::vector<std::string> consumers;
-        int num_of_consumer = rand() % 3;
-        bool is_overlapped = false;
-
-        while(num_of_consumer != 0)
-        {
-            int random_select_taskID = rand() % (task_num + 1);
-            std::string consumer = "TASK" + std::to_string(random_select_taskID);
-            for(int k = 0; k < consumers.size(); k++)
-            {
-                if(consumers.at(k) == consumer)
-                {
-                    is_overlapped = true;
-                    break;
-                }
-                if(consumer == task_name)
-                {
-                    is_overlapped = true;
-                    break;
-                }
-            }
-            if(is_overlapped == false)
-            {
-                consumers.push_back(consumer);
-                num_of_consumer--;
-            }
-            else
-            {
-                is_overlapped = false;
-            }
-        }
-
-        //each ecu can have [1-5] task.
-        int min_num = INT_MAX;
-        int min_ecu_id = 0;
-        for(int j = 0; j < vectors::ecu_vector.size(); j++)
-        {
-            if(min_num > vectors::ecu_vector.at(j)->get_num_of_task())
-            {
-                min_num = vectors::ecu_vector.at(j)->get_num_of_task();
-                min_ecu_id = vectors::ecu_vector.at(j)->get_ECU_id();
-            }
-        }
-
-        ecu_id = min_ecu_id;
-        vectors::ecu_vector.at(ecu_id)->set_num_of_task(min_num + 1);
-
-        //Task Name(id), period, deadline, wcet, bcet, offset, read, write, ecu, producer, consumers
-
-        std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, wcet, bcet, offset, is_read, is_write, ecu_id, producers, consumers);
-        vectors::task_vector.push_back(std::move(task));
-        
-    }
     // Creating vector spaces.
     for(int ecu_num =0; ecu_num < vectors::ecu_vector.size(); ecu_num++)
     {
@@ -202,7 +128,9 @@ void Initializer::random_ecu_generator(int ecu_num)
         std::shared_ptr<ECU> ecu =  std::make_shared<ECU>(100,"RM");
         vectors::ecu_vector.push_back(std::move(ecu));
     }
-    // What is this
+    /**
+     * Creating ECU Vector Spaces.
+     */
     for(int i = 0; i < ecu_num; i++)
     {
         std::vector<std::vector<std::shared_ptr<Job>>> v_job_of_ecu;
@@ -259,5 +187,116 @@ void Initializer::random_constraint_selector(double read_ratio, double write_rat
             vectors::task_vector.at(selector)->set_is_write(true);
             number_of_write--;
         }
+    }
+}
+
+bool Initializer::random_transaction_generator(int transaction_num, int task_num)
+{
+    /**
+     * We need N timer callbacks if there are N transactions.
+     * So, transaction num >= task num ALWAYS.
+     */
+    if(transaction_num < task_num)
+        return false;
+
+    /**
+     * Create Transaction Vector Spaces First
+     */
+    for(int i = 0; i < transaction_num; i++)
+    {
+        std::vector<std::shared_ptr<Task>> transaction;
+        vectors::transaction_vector.push_back(transaction);
+    }
+
+    /**
+     * Create Timer Callbacks with Number of Transactions.
+     */
+    for(int i = 0; i < transaction_num; i++)
+    {
+        std::string task_name = "T" + std::to_string(i);
+        int period = uniform_period_selector(transaction_num);
+        int offset = 0;
+        int priority = i;
+        int callback_type = 0;
+        int fet = (double)period * 0.1;
+        bool is_read = false;
+        bool is_write = false;
+        int ecu_id = random_ecu_selector();
+        std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id);
+        vectors::task_vector.push_back(task);
+        vectors::transaction_vector.at(i).push_back(task);
+    }
+    
+    return true;
+}
+
+int Initializer::random_ecu_selector()
+{   
+    int ecu_id = 0;
+    for(int i = 0; i < vectors::ecu_vector.size(); i++)
+    {
+        if(vectors::ecu_vector.at(ecu_id)->get_num_of_task() > vectors::ecu_vector.at(i)->get_num_of_task())
+        {
+            ecu_id = i;
+        }
+    }
+    vectors::ecu_vector.at(ecu_id)->set_num_of_task(vectors::ecu_vector.at(ecu_id)->get_num_of_task() + 1);
+    return ecu_id;
+}
+
+int Initializer::uniform_period_selector(int transaction_num)
+{
+    //[10-100] milli sec. uniform 10, 25, 50, 100 in transaction num
+
+    int min_val = INT_MAX;
+    int min_idx = 0;
+    for(int i = 0; i < 4; i++)
+    {
+        if(i == 0)
+            if(min_val < m_10)
+            {
+                min_val = m_10;
+                min_idx = 0;
+            }
+        if(i == 1)
+            if(min_val < m_25)
+            {
+                min_val = m_25;
+                min_idx = 1;
+            }
+        if(i == 2)
+            if(min_val < m_50)
+            {
+                min_val = m_50;
+                min_idx = 2;
+            }
+        if(i == 3)
+            if(min_val < m_100)
+            {
+                min_val = m_100;
+                min_idx = 3;
+            }
+    }
+
+    std::cout << min_idx << "min" << std::endl;
+    if(min_idx == 0)
+    {
+        m_10++;
+        return 10;
+    }
+    else if(min_idx == 1)
+    {
+        m_25++;
+        return 25;
+    }
+    else if(min_idx == 2)
+    {
+        m_50++;
+        return 50;
+    }    
+    else if(min_idx == 3)
+    {
+        m_100++;
+        return 100;
     }
 }

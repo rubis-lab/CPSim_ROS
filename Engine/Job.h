@@ -29,8 +29,6 @@ class Job : public Task
 private: 
     bool m_is_started;
     bool m_is_finished;
-    bool m_is_preempted;
-    bool m_is_resumed;
     bool m_is_released;
     bool m_is_running;
     bool m_is_simulated;
@@ -73,8 +71,6 @@ public:
      */
     bool get_is_started();
     bool get_is_finished();
-    bool get_is_preempted();
-    bool get_is_resumed();
     bool get_is_released();
     bool get_is_running();
     bool get_is_simulated();
@@ -92,13 +88,6 @@ public:
     double get_simulated_finish_time();
     double get_simulated_execution_time();
     std::vector<std::shared_ptr<Job>> get_history();
-
-    int get_est();
-    int get_lst();
-    int get_eft();
-    int get_lft();
-    int get_bpet();
-    int get_wpet();    
 
     std::array<int, 2>& get_wcbp();
     
@@ -137,7 +126,6 @@ public:
     void set_real_busy_period_start_time(int);
     void set_real_busy_period_finish_time(int);
     
-    void set_wcbp(std::array<int, 2>&);
     void set_job_set_start_det(std::vector<std::shared_ptr<Job>>&);
     void set_job_set_start_non_det(std::vector<std::shared_ptr<Job>>&);
     void set_job_set_finish_det(std::vector<std::shared_ptr<Job>>&);
@@ -154,7 +142,6 @@ public:
      */
     int calculate_release_time(int, int, int);
     int calculate_absolute_deadline(int, int);
-    std::array<int, 2> calculate_wcbp();
     void initialize_simulated_deadline();
     void update_simulated_deadline();
     double min_simulated_deadline_det_successor();

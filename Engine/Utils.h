@@ -35,7 +35,7 @@ namespace utils
      
     inline double simple_mapping_function = 0.3;
 
-    inline bool real_workload = true;
+    inline bool real_workload = false; 
 
     int greatest_common_divider(int a, int b);
     int least_common_multiple(int a, int b);
@@ -48,10 +48,11 @@ namespace utils
 
 namespace vectors
 {
-    inline std::vector<std::shared_ptr<Job> > job_vector_of_simulator;
+    inline std::vector<std::shared_ptr<Job>> job_vector_of_simulator;
     inline std::vector<std::vector<std::vector<std::shared_ptr<Job>>>> job_vectors_for_each_ECU;
-    inline std::vector<std::shared_ptr<ECU> > ecu_vector;
+    inline std::vector<std::shared_ptr<ECU>> ecu_vector;
     inline std::vector<std::shared_ptr<Task>> task_vector;
+    inline std::vector<std::vector<std::shared_ptr<Task>>> transaction_vector;
 }
 
 namespace global_object

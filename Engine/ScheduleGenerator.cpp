@@ -4,17 +4,17 @@
 
 /**
  *  This file is the cpp file for the ScheduleSimulator class.
- *  @file ScheduleSimulator.cpp
- *  @brief cpp file for Engine-ScheduleSimulator
+ *  @file ScheduleGenerator.cpp
+ *  @brief cpp file for Engine-ScheduleGenerator
  *  @author Seonghyeon Park
- *  @date 2020-03-31
+ *  @date 2020-08-20
  */
 
 /**
- * @fn ScheduleSimulator::ScheduleSimulator()
+ * @fn ScheduleGenerator::ScheduleGenerator()
  * @brief the function of basic constructor of ScheduleSimulator
  * @author Seonghyeon Park
- * @date 2020-04-01
+ * @date 2020-08-20
  * @details 
  *  - None
  * @param none
@@ -29,8 +29,8 @@ ScheduleGenerator::ScheduleGenerator()
 }
 
 /**
- * @fn ScheduleSimulator::~ScheduleSimulator()
- * @brief the function of basic destroyer of ScheduleSimulator
+ * @fn ScheduleGenerator::~ScheduleGenerator()
+ * @brief the function of basic destroyer of ScheduleGenerator
  * @author Seonghyeon Park
  * @date 2020-04-01
  * @details 
@@ -47,7 +47,7 @@ ScheduleGenerator::~ScheduleGenerator()
 }
 
 /**
- * @fn void ScheduleSimulator::simulate_scheduling_on_Real()
+ * @fn void ScheduleGenerator::simulate_scheduling_on_Real()
  * @brief this function simulates a scheduling scenario of Real Cyber System.
  * @author Seonghyeon Park
  * @date 2020-04-01
@@ -101,15 +101,8 @@ void ScheduleGenerator::simulate_scheduling_on_real(double global_hyper_period_s
      * Job instances generation for one HP
      */
     // Get rid of previous simulation loops stuff.
-    //for(auto iter = vectors::task_vector.begin(); iter != vectors::task_vector.end(); iter ++ )
     for(int i = 0; i < vectors::task_vector.size(); ++i)
-    {   // #CRASH#
-        // Crash occurs in here when GPU is enabled.
-        // I think it is because
-        // Init and Sync jobs are two different tasks, but they have the same task ID as eachother.
-        // I am not sure.
-        // What is the best way to fix this?
-        //int task_idx = iter->get()->get_task_id();
+    {   
         int task_id = vectors::task_vector.at(i)->get_task_id();
         /**
          * number_of_jobs of this task in this hyper_period if offset is 0
@@ -119,7 +112,6 @@ void ScheduleGenerator::simulate_scheduling_on_real(double global_hyper_period_s
         {
             //std::shared_ptr<Job> job = std::make_shared<Job>(*iter, job_id);
             std::shared_ptr<Job> job = std::make_shared<Job>(vectors::task_vector.at(task_id), job_id, global_hyper_period_start_point);
-            job->m_casted_func = vectors::task_vector.at(task_id)->m_casted_func;
             vectors::job_vectors_for_each_ECU.at(vectors::task_vector.at(i)->get_ECU()->get_ECU_id()).at(vectors::task_vector.at(i)->get_vector_idx()).push_back(std::move(job));
             //vectors::job_vectors_for_each_ECU.at(iter->get()->get_ECU()->get_ECU_id()).at(task_idx).push_back(std::move(job));
         }
@@ -131,8 +123,7 @@ void ScheduleGenerator::simulate_scheduling_on_real(double global_hyper_period_s
             {
                 job->set_is_started(false);
                 job->set_is_finished(false);
-                job->set_is_preempted(false);
-                job->set_is_resumed(false);
+
             }
     
     int offset = global_hyper_period_start_point;
@@ -163,8 +154,6 @@ void ScheduleGenerator::simulate_scheduling_on_real(double global_hyper_period_s
                 {
                     job->set_is_started(false);
                     job->set_is_finished(false);
-                    job->set_is_preempted(false);
-                    job->set_is_resumed(false);
                 }
             int current_time_point = global_hyper_period_start_point;
 
@@ -201,7 +190,7 @@ void ScheduleGenerator::simulate_scheduling_on_real(double global_hyper_period_s
                     for(auto job : vectors::job_vectors_for_each_ECU.at(ecu_id).at(task_id))
                     {
                         //if(job->get_priority_policy() != PriorityPolicy::CPU) continue; // Only account for CPU jobs, maintain backwards compatability.
-                        if((!job->get_is_finished()) && (job->get_actual_release_time() <= current_time_point))
+                        if((!job->get_is_finished()) && (job->get_real_release_time() <= current_time_point))
                         {
                             job->set_is_released(true);
                             job_queue.push_back(job);

@@ -124,6 +124,19 @@ int utils::least_common_multiple_array(std::vector<std::shared_ptr<Task> >& task
 	return lcm_of_array;
 }
 
+/**
+ * @fn void calculate_hyper_period()
+ * @brief This function stops the simulation when ctrl + C command is triggered.
+ * @author Seonghyeon Park
+ * @date 2020-08-20
+ * @details 
+ *  Using signal handler API.
+ * @param none
+ * @return none
+ * @bug none
+ * @warning none
+ * @todo none
+ */
 int utils::calculate_hyper_period(std::vector<std::shared_ptr<Task>>& task_set)
 {
 	int hyper_period = 0;
@@ -133,19 +146,18 @@ int utils::calculate_hyper_period(std::vector<std::shared_ptr<Task>>& task_set)
 }
 
 /**
- * @fn void insert_can_msg()
- * @brief This function inserts CAN_Msg class into 'msg_list' list.
+ * @fn void exit_simulation()
+ * @brief This function stops the simulation when ctrl + C command is triggered.
  * @author Seonghyeon Park
- * @date 2020-04-01
+ * @date 2020-08-20
  * @details 
- *  Each class is inserted into the list according to its time.
+ *  Using signal handler API.
  * @param none
  * @return none
  * @bug none
  * @warning none
  * @todo none
  */
-
 void utils::exit_simulation(int signo)
 {
 	std::cout << "Simulation End\n" << std::endl;

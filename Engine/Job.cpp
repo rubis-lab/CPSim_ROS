@@ -98,14 +98,6 @@ bool Job::get_is_finished()
 {
     return m_is_finished;
 }
-bool Job::get_is_preempted()
-{
-    return m_is_preempted;
-}
-bool Job::get_is_resumed()
-{
-    return m_is_resumed;
-}
 bool Job::get_is_released()
 {
     return m_is_released;
@@ -227,14 +219,6 @@ void Job::set_is_finished(bool is_finished)
 {
     m_is_finished = is_finished;
 }
-void Job::set_is_preempted(bool is_preempted)
-{
-    m_is_preempted = is_preempted;
-}
-void Job::set_is_resumed(bool is_resumed)
-{
-    m_is_resumed = is_resumed;
-}
 void Job::set_is_released(bool is_released)
 {
     m_is_released = is_released;
@@ -290,13 +274,6 @@ void Job::set_simulated_execution_time(double simulated_execution_time)
 {
     m_simulated_execution_time = std::floor(simulated_execution_time*10)/10;
 }
-
-
-void Job::set_wcbp(std::array<int, 2>& wcbp)
-{
-    m_worst_case_busy_period = wcbp;
-}
-
 void Job::set_job_set_start_det(std::vector<std::shared_ptr<Job>>& job_set_start_det)
 {
     m_job_set_start_det = job_set_start_det;
