@@ -24,6 +24,8 @@ private:
     int m_25;
     int m_50;
     int m_100;
+    int m_timer_num;
+    int m_subscriber_num;
     
 public:
     /**
@@ -33,11 +35,10 @@ public:
     ~Initializer();
 
     bool random_transaction_generator(int, int); //this function is for experiments.
-    void random_task_generator(int); // this function is for experiments.
     void random_ecu_generator(int); // this function is for experiments.
     void random_producer_consumer_generator();
     void random_constraint_selector(double, double);
-    int random_ecu_selector();
+    int uniform_ecu_selector();
     int uniform_period_selector(int);
     void set_simulatorPC_performance();
     void initialize();

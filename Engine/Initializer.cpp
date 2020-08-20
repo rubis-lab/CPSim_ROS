@@ -90,7 +90,7 @@ void Initializer::initialize()
         random_producer_consumer_generator();
 
         for(auto task : vectors::task_vector)
-            std::cout << task->get_period() << std::endl;
+            std::cout << task->get_fet() << std::endl;
     }
                           
     
@@ -105,20 +105,6 @@ void Initializer::initialize()
     global_object::logger = std::make_shared<Logger>();
     global_object::logger->log_task_vector_status();
 
-}
-
-void Initializer::random_task_generator(int task_num)
-{
-    // Creating vector spaces.
-    for(int ecu_num =0; ecu_num < vectors::ecu_vector.size(); ecu_num++)
-    {
-        for(int i = 0; i < task_num; i++)
-        {
-            std::vector<std::shared_ptr<Job>> v_job_of_ecu;
-            vectors::job_vectors_for_each_ECU.at(ecu_num).push_back(v_job_of_ecu);
-        }
-    }
-    
 }
 
 void Initializer::random_ecu_generator(int ecu_num)
@@ -221,16 +207,20 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         int fet = (double)period * 0.1;
         bool is_read = false;
         bool is_write = false;
-        int ecu_id = random_ecu_selector();
+        int ecu_id = uniform_ecu_selector();
         std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id);
         vectors::task_vector.push_back(task);
         vectors::transaction_vector.at(i).push_back(task);
     }
     
+
+    /**
+     * Create Subscriber Callbacks with Task Num - Transaction Num
+     */
     return true;
 }
 
-int Initializer::random_ecu_selector()
+int Initializer::uniform_ecu_selector()
 {   
     int ecu_id = 0;
     for(int i = 0; i < vectors::ecu_vector.size(); i++)
@@ -253,32 +243,30 @@ int Initializer::uniform_period_selector(int transaction_num)
     for(int i = 0; i < 4; i++)
     {
         if(i == 0)
-            if(min_val < m_10)
+            if(min_val > m_10)
             {
                 min_val = m_10;
                 min_idx = 0;
             }
         if(i == 1)
-            if(min_val < m_25)
+            if(min_val > m_25)
             {
                 min_val = m_25;
                 min_idx = 1;
             }
         if(i == 2)
-            if(min_val < m_50)
+            if(min_val > m_50)
             {
                 min_val = m_50;
                 min_idx = 2;
             }
         if(i == 3)
-            if(min_val < m_100)
+            if(min_val > m_100)
             {
                 min_val = m_100;
                 min_idx = 3;
             }
     }
-
-    std::cout << min_idx << "min" << std::endl;
     if(min_idx == 0)
     {
         m_10++;
