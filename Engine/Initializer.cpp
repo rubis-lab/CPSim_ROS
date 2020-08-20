@@ -81,16 +81,13 @@ void Initializer::initialize()
         /**
          * Task Vector Initialization
          */
-        if(!random_transaction_generator(10, 10))
+        if(!random_transaction_generator(2, 3))
             std::cout << "TASK NUMBER IS TOO MUCH" << std::endl;
         /**
          * Each task can be [0-2] data producer of random selected job.
          */
         random_constraint_selector(0.3, 0.3);
         random_producer_consumer_generator();
-
-        for(auto task : vectors::task_vector)
-            std::cout << task->get_fet() << std::endl;
     }
                           
     
@@ -180,9 +177,9 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
 {
     /**
      * We need N timer callbacks if there are N transactions.
-     * So, transaction num >= task num ALWAYS.
+     * So, transaction num <= task num ALWAYS.
      */
-    if(transaction_num < task_num)
+    if(transaction_num > task_num)
         return false;
 
     /**
@@ -197,7 +194,8 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
     /**
      * Create Timer Callbacks with Number of Transactions.
      */
-    for(int i = 0; i < transaction_num; i++)
+    m_timer_num = transaction_num;
+    for(int i = 0; i < m_timer_num; i++)
     {
         std::string task_name = "T" + std::to_string(i);
         int period = uniform_period_selector(transaction_num);
@@ -217,6 +215,23 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
     /**
      * Create Subscriber Callbacks with Task Num - Transaction Num
      */
+    m_subscriber_num = task_num - m_timer_num;
+    for(int i = 0; i < m_subscriber_num; i++)
+    {
+        std::string task_name = "S" + std::to_string(i);
+        int period = -1;
+        int offset = -1;
+        int priority = -1;
+        int callback_type = 1;
+        int fet = 10;
+        bool is_read = false;
+        bool is_write = false;
+        int ecu_id = uniform_ecu_selector();
+        std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id);
+        vectors::task_vector.push_back(task);
+        vectors::transaction_vector.at(i).push_back(task); //TBD
+    }
+
     return true;
 }
 
