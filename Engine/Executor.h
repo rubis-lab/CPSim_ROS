@@ -54,7 +54,7 @@ public:
     void update_ecu_schedule(std::shared_ptr<Job>, OldData);
     void update_simulated_deadlines(int);
     void update_jobset(std::shared_ptr<Job>);
-    bool run_simulation(double);
+    bool run_simulation();
     void change_execution_time();
 
     void assign_deadline_for_simulated_jobs();

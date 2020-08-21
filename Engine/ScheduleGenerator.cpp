@@ -45,7 +45,14 @@ ScheduleGenerator::~ScheduleGenerator()
 {
 
 }
+void ScheduleGenerator::generate_schedule_Offline()
+{
 
+}
+void ScheduleGenerator::generate_schedule_Online()
+{
+    
+}
 void ScheduleGenerator::busy_period_analysis(std::vector<std::shared_ptr<Job>>& job_queue, int start, int& end, int ecu_id, bool setWorstCase)
 {
     

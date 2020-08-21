@@ -44,9 +44,8 @@ public:
     /**
      * Generate Real Cyber System Schedule Globally with a Hyper Period unit.
      */
-    void generate_schedule_HP();
-    void generate_schedule_Callback();
-    void simulate_scheduling_on_real(double);
+    void generate_schedule_Offline();
+    void generate_schedule_Online();
     void update_job_vector();
     void busy_period_analysis(std::vector<std::shared_ptr<Job>>& job_queue, int start, int& end, int ecu_id, bool setWorstCase);
 };

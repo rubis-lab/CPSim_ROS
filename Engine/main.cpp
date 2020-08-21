@@ -73,6 +73,9 @@ int main(int argc, char *argv[])
         Executor executor;
         
         initializer_module.initialize();
+        schedule_generator.generate_schedule_Offline();
+        offline_guider.construct_job_precedence_graph();
+        executor.run_simulation();
     }
     return 0;
 }

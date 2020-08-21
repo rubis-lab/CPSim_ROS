@@ -95,7 +95,7 @@ void Executor::set_current_hyper_period_end(int current_hyper_period_end)
  * @warning none
  * @todo implement this today's night
  */
-bool Executor::run_simulation(double start_time)
+bool Executor::run_simulation()
 {
     double end_time = start_time + utils::hyper_period;
     move_ecus_jobs_to_simulator(); // Copies job vectors from ECUs to Sim.

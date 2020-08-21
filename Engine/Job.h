@@ -39,6 +39,8 @@ private:
     int m_real_execution_time;
     int m_real_start_time;
     int m_real_finish_time;
+    int m_real_busy_period_start_time;
+    int m_real_busy_period_finish_time;
 
     double m_simulated_release_time;
     double m_simulated_deadline;
@@ -46,7 +48,6 @@ private:
     double m_simulated_start_time;
     double m_simulated_finish_time;
 
-    std::array<int, 2> m_worst_case_busy_period;
     std::vector<std::shared_ptr<Job>> m_history_of_sim_deadline;
     std::vector<std::shared_ptr<Job>> m_job_set_start_det;
     std::vector<std::shared_ptr<Job>> m_job_set_start_non_det;
@@ -81,6 +82,8 @@ public:
     int get_real_start_time();
     int get_real_finish_time();
     int get_real_execution_time();
+    int get_real_busy_period_start_time();
+    int get_real_busy_period_finish_time();
 
     double get_simulated_release_time();
     double get_simulated_deadline();
@@ -89,7 +92,6 @@ public:
     double get_simulated_execution_time();
     std::vector<std::shared_ptr<Job>> get_history();
 
-    std::array<int, 2>& get_wcbp();
     
     std::vector<std::shared_ptr<Job>>& get_job_set_start_det();
     std::vector<std::shared_ptr<Job>>& get_job_set_start_non_det();

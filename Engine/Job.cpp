@@ -137,6 +137,14 @@ int Job::get_real_execution_time()
 {
     return m_real_execution_time;
 }
+int Job::get_real_busy_period_start_time()
+{
+    return m_real_busy_period_start_time;
+}
+int Job::get_real_busy_period_finish_time()
+{
+    return m_real_busy_period_finish_time;
+}
 
 double Job::get_simulated_release_time()
 {
@@ -157,11 +165,6 @@ double Job::get_simulated_finish_time()
 double Job::get_simulated_execution_time()
 {
     return std::floor(m_simulated_execution_time*10)/10;
-}
-
-std::array<int, 2>& Job::get_wcbp()
-{
-    return m_worst_case_busy_period;
 }
 
 
@@ -253,7 +256,14 @@ void Job::set_real_execution_time(int original_execution_time)
 {
     m_real_execution_time = original_execution_time;
 }
-
+void Job::set_real_busy_period_start_time(int real_busy_period_start_time)
+{
+    m_real_busy_period_start_time = real_busy_period_start_time;
+}
+void Job::set_real_busy_period_finish_time(int real_busy_period_finish_time)
+{
+    m_real_busy_period_finish_time = real_busy_period_finish_time;
+}
 void Job::set_simulated_release_time(double simulated_release_time)
 {
     m_simulated_release_time = std::floor(simulated_release_time*10)/10;
