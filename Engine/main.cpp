@@ -73,9 +73,15 @@ int main(int argc, char *argv[])
         Executor executor;
         
         initializer_module.initialize();
-        schedule_generator.generate_schedule_Offline();
+        schedule_generator.generate_schedule_offline();
         offline_guider.construct_job_precedence_graph();
-        executor.run_simulation();
+        
+        while(utils::current_time <= utils::hyper_period *2) // we are going to run simulation with two hyper period times. 
+        {
+            executor.run_simulation();                      // run a job on the simulator
+            schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
+            offline_guider.update_job_precedence_graph();   // update job_precedence_graph
+        }
     }
     return 0;
 }

@@ -45,11 +45,37 @@ ScheduleGenerator::~ScheduleGenerator()
 {
 
 }
-void ScheduleGenerator::generate_schedule_Offline()
+/**
+ * @fn void ScheduleGenerator::generate_schedule_offline()
+ * @brief the function
+ * @author Seonghyeon Park
+ * @date 2020-08-21
+ * @details 
+ *  - it generates a schedule in a hyper period at offline state.
+ * @param none
+ * @return none
+ * @bug none
+ * @warning none
+ * @todo none
+ */
+void ScheduleGenerator::generate_schedule_offline()
 {
 
 }
-void ScheduleGenerator::generate_schedule_Online()
+/**
+ * @fn void ScheduleGenerator::generate_schedule_online()
+ * @brief the function
+ * @author Seonghyeon Park
+ * @date 2020-08-21
+ * @details 
+ *  - it generates a job at next hyper period at online state.
+ * @param none
+ * @return none
+ * @bug none
+ * @warning none
+ * @todo none
+ */
+void ScheduleGenerator::generate_schedule_online()
 {
     
 }
