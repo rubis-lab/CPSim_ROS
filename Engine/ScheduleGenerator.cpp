@@ -60,7 +60,15 @@ ScheduleGenerator::~ScheduleGenerator()
  */
 void ScheduleGenerator::generate_schedule_offline()
 {
-
+    //with a hyper period.
+    while(utils::current_time < (0 + utils::hyper_period))
+    {
+        for(auto ecu : vectors::ecu_vector)
+        {
+            std::cout << ecu->get_ecu_ready_set().size() << std::endl;
+        }
+    }
+    
 }
 /**
  * @fn void ScheduleGenerator::generate_schedule_online()

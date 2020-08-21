@@ -95,14 +95,7 @@ Task::Task(std::string task_name, int period, int deadline, int priority, int ca
     m_is_write = is_write;
     m_producer_info = prodcuer;
     m_consumer_info = consumer;
-    
-    for(auto iter = vectors::ecu_vector.begin(); iter != vectors::ecu_vector.end(); iter++)
-    {
-        if(ecu_id == iter->get()->get_ECU_id())
-        {
-            m_ecu = *iter;
-        }
-    }
+    m_ecu_id = ecu_id;
 }
 
 Task::Task(std::string task_name, int period, int deadline, int priority, int callback_type,
@@ -121,14 +114,7 @@ Task::Task(std::string task_name, int period, int deadline, int priority, int ca
     m_is_write = is_write;
     m_producer = prodcuer;
     m_consumer = consumer;
-    
-    for(auto iter = vectors::ecu_vector.begin(); iter != vectors::ecu_vector.end(); iter++)
-    {
-        if(ecu_id == iter->get()->get_ECU_id())
-        {
-            m_ecu = *iter;
-        }
-    }
+    m_ecu_id = ecu_id;
 }
 
 /**
@@ -293,9 +279,9 @@ bool Task::get_is_write()
     return m_is_write;
 }
 
-std::shared_ptr<ECU> Task::get_ECU()
+int Task::get_ECU_id()
 {
-    return m_ecu;
+    return m_ecu_id;
 }
 
 std::shared_ptr<Task> Task::get_producer()
@@ -384,9 +370,9 @@ void Task::set_consumer_info(std::string consumer_info)
 {
     m_consumer_info = consumer_info;
 }
-void Task::set_ECU(std::shared_ptr<ECU> ecu)
+void Task::set_ECU_id(int ecu_id)
 {
-    m_ecu = ecu;
+    m_ecu_id = ecu_id;
 }
 
 void Task::synchronize_producer_consumer_relation()

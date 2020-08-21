@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "ECU.h"
 #include <chrono>
 
 #ifdef __linux__
@@ -48,11 +47,11 @@ private:
 	int m_priority;
 	int m_callback_type;
 	int m_fet; 
+	int m_ecu_id;
 
 	bool m_is_read;
 	bool m_is_write;
 
-	std::shared_ptr<ECU> m_ecu;
 	std::string m_producer_info;
 	std::string m_consumer_info;
 	std::shared_ptr<Task> m_producer;
@@ -90,6 +89,7 @@ public:
 	int get_priority();
 	int get_callback_type();
 	int get_fet();
+	int get_ECU_id();
 	bool get_is_read();
 	bool get_is_write();
 
@@ -97,7 +97,7 @@ public:
 	std::shared_ptr<Task> get_consumer();
 	std::string get_producer_info();
 	std::string get_consumer_info();
-	std::shared_ptr<ECU> get_ECU();
+
     /**
      * Setter member functions
      */
@@ -117,7 +117,7 @@ public:
 	void set_consumer(std::shared_ptr<Task>);
 	void set_producer_info(std::string);
 	void set_consumer_info(std::string);
-	void set_ECU(std::shared_ptr<ECU>);
+	void set_ECU_id(int);
 
 	
 	void add_task_to_consumer(std::shared_ptr<Task>);
