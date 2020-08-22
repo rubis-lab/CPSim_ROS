@@ -143,3 +143,23 @@ void ECU::set_num_of_task(int num)
 {
     m_num_of_task = num;
 }
+
+std::vector<std::shared_ptr<Job>> ECU::get_ecu_ready_set()
+{
+    return m_ready_set;
+}
+
+void ECU::set_ecu_ready_set(std::vector<std::shared_ptr<Job>> ready_set)
+{
+    m_ready_set = ready_set;
+}
+
+void ECU::add_task_to_ecu(std::shared_ptr<Task> task)
+{
+    m_task_set.push_back(task);
+}
+
+void ECU::add_job_to_ready_set(std::shared_ptr<Job> job)
+{
+    m_ready_set.push_back(job);
+}

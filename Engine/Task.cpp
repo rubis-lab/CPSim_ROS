@@ -68,14 +68,7 @@ Task::Task(std::string task_name, int period, int deadline, int priority, int ca
     m_fet = fet;
     m_is_read = is_read;
     m_is_write = is_write;
-
-    for(auto iter = vectors::ecu_vector.begin(); iter != vectors::ecu_vector.end(); iter++)
-    {
-        if(ecu_id == iter->get()->get_ECU_id())
-        {
-            m_ecu = *iter;
-        }
-    }
+    m_ecu_id = ecu_id;
 }
 
 Task::Task(std::string task_name, int period, int deadline, int priority, int callback_type,

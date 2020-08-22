@@ -56,7 +56,7 @@ Job::Job(std::shared_ptr<Task> task, int job_id, int hyper_period_start)
     this->set_fet(task->get_fet());
     this->set_is_read(task->get_is_read());
     this->set_is_write(task->get_is_write());
-    this->set_ECU(task->get_ECU());
+    this->set_ECU_id(task->get_ECU_id());
     this->set_producer(task->get_producer());
     this->set_consumer(task->get_consumer());
 

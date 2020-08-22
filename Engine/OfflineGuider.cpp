@@ -80,6 +80,10 @@ void OfflineGuider::construct_job_precedence_graph()
         }
     }
 }
+void OfflineGuider::update_job_precedence_graph()
+{
+
+}
 
 // To affect us, a job must be higher priority, and from another task.
 // Current jobs WCBP should start before or at same time as the high job's release time.

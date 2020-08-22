@@ -76,8 +76,8 @@ void Initializer::initialize()
          * ECU Vector Initialization
          * number of ECU is [3-10]
          */
-        random_ecu_generator((rand() % 8) + 3);
-
+        //random_ecu_generator((rand() % 8) + 3);
+        random_ecu_generator(2);
         /**
          * Task Vector Initialization
          */
@@ -207,6 +207,7 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         bool is_write = false;
         int ecu_id = uniform_ecu_selector();
         std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id);
+        vectors::ecu_vector.at(ecu_id)->add_task_to_ecu(task);
         vectors::task_vector.push_back(task);
         vectors::transaction_vector.at(i).push_back(task);
     }

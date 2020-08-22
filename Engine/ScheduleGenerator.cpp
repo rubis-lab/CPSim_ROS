@@ -60,13 +60,18 @@ ScheduleGenerator::~ScheduleGenerator()
  */
 void ScheduleGenerator::generate_schedule_offline()
 {
-    //with a hyper period.
-    while(utils::current_time < (0 + utils::hyper_period))
+    unsigned long long offline_current_time = 0;
+    generate_job_instances_for_hyper_period();
+    while(offline_current_time < (0 + utils::hyper_period))
     {
+        bool is_any_job_released = false;
         for(auto ecu : vectors::ecu_vector)
         {
-            std::cout << ecu->get_ecu_ready_set().size() << std::endl;
+            if(ecu->)
         }
+
+
+        offline_current_time ++;
     }
     
 }
@@ -112,4 +117,26 @@ void ScheduleGenerator::update_job_vector()
         }
 
     }
+}
+
+void ScheduleGenerator::generate_job_instances_for_hyper_period()
+{
+    //Generates Job instances
+    int num_of_job_of_this_task = 0;
+    
+    for(int task_idx = 0; task_idx < vectors::task_vector.size(); task_idx++)
+    {
+        int task_id = vectors::task_vector.at(task_idx)->get_task_id();
+        /**
+         * number_of_jobs of this task in this hyper_period if offset is 0
+         */
+        int num_of_jobs = utils::hyper_period / vectors::task_vector.at(task_idx)->get_period();
+        for(int job_id = 1; job_id <= num_of_jobs; job_id++)
+        {
+            std::shared_ptr<Job> job = std::make_shared<Job>(vectors::task_vector.at(task_id), job_id, 0);
+            //vectors::job_vectors_for_each_ECU.at(job->get_ECU_id()).at(vectors::task_vector.at(task_idx)->get_vector_idx()).push_back(std::move(job));
+            vectors::ecu_vector.at(job->get_ECU_id())->
+        }
+    }
+    
 }
