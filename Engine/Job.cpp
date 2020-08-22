@@ -90,26 +90,39 @@ Job::~Job()
 {
     
 }
-bool Job::get_is_started()
+bool Job::get_is_real_started()
 {
-    return m_is_started;
+    return m_is_real_started;
 }
-bool Job::get_is_finished()
+bool Job::get_is_real_finished()
 {
-    return m_is_finished;
+    return m_is_real_finished;
 }
-bool Job::get_is_released()
+bool Job::get_is_real_released()
 {
-    return m_is_released;
+    return m_is_real_released;
 }
-bool Job::get_is_running()
+bool Job::get_is_real_running()
 {
-    return m_is_running;
+    return m_is_real_running;
 }
-bool Job::get_is_simulated()
+bool Job::get_is_simulated_released()
 {
-    return m_is_simulated;
+    return m_is_simulated_released;
 }
+bool Job::get_is_simulated_running()
+{
+    return m_is_simulated_running;
+}
+bool Job::get_is_simulated_started()
+{
+    return m_is_simulated_started;
+}
+bool Job::get_is_simulated_finished()
+{
+    return m_is_simulated_finished;
+}
+
 int Job::get_job_id()
 {
     return m_job_id;
@@ -214,25 +227,37 @@ std::vector<std::shared_ptr<Job>>& Job::get_non_det_successors()
     return m_non_det_successors;
 }
 
-void Job::set_is_started(bool is_started)
+void Job::set_is_real_started(bool is_started)
 {
-    m_is_started = is_started;
+    m_is_real_started = is_started;
 }
-void Job::set_is_finished(bool is_finished)
+void Job::set_is_real_finished(bool is_finished)
 {
-    m_is_finished = is_finished;
+    m_is_real_finished = is_finished;
 }
-void Job::set_is_released(bool is_released)
+void Job::set_is_real_released(bool is_released)
 {
-    m_is_released = is_released;
+    m_is_real_released = is_released;
 }
-void Job::set_is_running(bool is_running)
+void Job::set_is_real_running(bool is_running)
 {
-    m_is_running = is_running;
+    m_is_real_running = is_running;
 }
-void Job::set_is_simulated(bool is_simulated)
+void Job::set_is_simulated_released(bool is_simulated_released)
 {
-    m_is_simulated = is_simulated;
+    m_is_simulated_released = is_simulated_released;
+}
+void Job::set_is_simulated_running(bool is_simulated_running)
+{
+    m_is_simulated_running = is_simulated_running;
+}
+void Job::set_is_simulated_started(bool is_simulated_started)
+{
+    m_is_simulated_started = is_simulated_started;
+}
+void Job::set_is_simulated_finished(bool is_simulated_finished)
+{
+    m_is_simulated_finished = is_simulated_finished;
 }
 
 void Job::set_real_release_time(int release_time)
@@ -356,7 +381,7 @@ void Job::initialize_simulated_deadline()
 }
 void Job::update_simulated_deadline()
 {
-    if(m_is_simulated == false || m_is_released == false)
+    if(m_is_simulated_finished == false || m_is_simulated_released == false)
     {
         if(this->get_is_write())
         {

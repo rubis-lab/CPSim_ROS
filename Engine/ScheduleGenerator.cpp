@@ -62,14 +62,67 @@ void ScheduleGenerator::generate_schedule_offline()
 {
     unsigned long long offline_current_time = 0;
     generate_job_instances_for_hyper_period();
+
     while(offline_current_time < (0 + utils::hyper_period))
     {
         bool is_any_job_released = false;
         for(auto ecu : vectors::ecu_vector)
         {
-            if(ecu->)
+            // std::cout << ecu->get_ECU_id() << "ECUs ";
+            // std::cout << "time : "<< offline_current_time;
+            // std::cout << " size : " << ecu->get_released_jobset().size() << std::endl;
+            //
+            for(auto job : ecu->get_released_jobset())
+            {
+                // IF Job is a timer callback, it can be directly added to ReadySet.
+                if(job->get_callback_type() == 0)
+                {
+                    if(job->get_real_release_time() == offline_current_time)
+                    {
+                        ecu->add_job_to_ready_set(job);
+                        ecu->delete_job_from_released_jobset(std::move(job));
+                    }
+                }
+                else // IF Job is a subscriber callback, it should wait until readySet is empty.
+                {
+                    if(ecu->get_ecu_ready_set().size() == 0)
+                    {
+                        if(job->get_real_release_time() == offline_current_time)
+                        {
+                            ecu->add_job_to_ready_set(job);
+                            ecu->delete_job_from_released_jobset(std::move(job));
+                            ecu->copy_pending_jobset_to_ready_set();
+                            ecu->flush_pending_jobset();
+                        }
+                    }
+                    else
+                    {
+                        if(job->get_real_release_time() == offline_current_time)
+                        {
+                            ecu->add_job_to_pending_jobset(job);
+                            ecu->delete_job_from_released_jobset(std::move(job));
+                        }
+                        else
+                        {
+                            continue;   
+                        }
+                    }
+                }
+            }
+            // 
+            int minimum_priority_value;
+            int minimum_idx = 0;
+            for(auto job : ecu->get_ecu_ready_set())
+            {
+                // select a highest job in the ReadySet
+                // for that, we must find minimum priority value.
+                if()
+                {
+                    s
+                }
+            }
         }
-
+        // std::cout << std::endl;
 
         offline_current_time ++;
     }
@@ -126,16 +179,22 @@ void ScheduleGenerator::generate_job_instances_for_hyper_period()
     
     for(int task_idx = 0; task_idx < vectors::task_vector.size(); task_idx++)
     {
-        int task_id = vectors::task_vector.at(task_idx)->get_task_id();
-        /**
-         * number_of_jobs of this task in this hyper_period if offset is 0
-         */
-        int num_of_jobs = utils::hyper_period / vectors::task_vector.at(task_idx)->get_period();
-        for(int job_id = 1; job_id <= num_of_jobs; job_id++)
+        if(vectors::task_vector.at(task_idx)->get_callback_type() != 0)
         {
-            std::shared_ptr<Job> job = std::make_shared<Job>(vectors::task_vector.at(task_id), job_id, 0);
-            //vectors::job_vectors_for_each_ECU.at(job->get_ECU_id()).at(vectors::task_vector.at(task_idx)->get_vector_idx()).push_back(std::move(job));
-            vectors::ecu_vector.at(job->get_ECU_id())->
+            // if task is not timer_callback, do nothing.
+        }
+        else
+        {
+            int task_id = vectors::task_vector.at(task_idx)->get_task_id();
+            /**
+             * number_of_jobs of this task in this hyper_period if offset is 0
+             */
+            int num_of_jobs = utils::hyper_period / vectors::task_vector.at(task_idx)->get_period();
+            for(int job_id = 1; job_id <= num_of_jobs; job_id++)
+            {
+                std::shared_ptr<Job> job = std::make_shared<Job>(vectors::task_vector.at(task_id), job_id, 0);
+                vectors::ecu_vector.at(job->get_ECU_id())->add_job_to_released_jobset(std::move(job));
+            }   
         }
     }
     

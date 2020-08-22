@@ -27,11 +27,16 @@
 class Job : public Task
 {
 private: 
-    bool m_is_started;
-    bool m_is_finished;
-    bool m_is_released;
-    bool m_is_running;
-    bool m_is_simulated;
+    // In real-cyber system
+    bool m_is_real_released;
+    bool m_is_real_running;
+    bool m_is_real_started;
+    bool m_is_real_finished;
+    // In simulated-cyber system
+    bool m_is_simulated_released;
+    bool m_is_simulated_running;
+    bool m_is_simulated_started;
+    bool m_is_simulated_finished;
 
     int m_job_id;
     int m_real_release_time;
@@ -70,11 +75,15 @@ public:
     /**
      * Getter & Setter
      */
-    bool get_is_started();
-    bool get_is_finished();
-    bool get_is_released();
-    bool get_is_running();
-    bool get_is_simulated();
+    bool get_is_real_started();
+    bool get_is_real_finished();
+    bool get_is_real_released();
+    bool get_is_real_running();
+
+    bool get_is_simulated_released();
+    bool get_is_simulated_running();
+    bool get_is_simulated_started();
+    bool get_is_simulated_finished();
 
     int get_job_id();
     int get_real_release_time();
@@ -104,13 +113,15 @@ public:
     std::vector<std::shared_ptr<Job>>& get_non_det_prdecessors();
     std::vector<std::shared_ptr<Job>>& get_non_det_successors();
 
-    void set_is_started(bool);
-    void set_is_finished(bool);
-    void set_is_preempted(bool);
-    void set_is_resumed(bool);
-    void set_is_released(bool);
-    void set_is_running(bool);
-    void set_is_simulated(bool);
+    void set_is_real_started(bool);
+    void set_is_real_finished(bool);
+    void set_is_real_released(bool);
+    void set_is_real_running(bool);
+    
+    void set_is_simulated_released(bool);
+    void set_is_simulated_running(bool);
+    void set_is_simulated_started(bool);
+    void set_is_simulated_finished(bool);
     
     void set_job_id(int);
     void set_real_release_time(int);

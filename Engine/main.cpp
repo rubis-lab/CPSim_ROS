@@ -75,7 +75,6 @@ int main(int argc, char *argv[])
         initializer_module.initialize();
         schedule_generator.generate_schedule_offline();
         offline_guider.construct_job_precedence_graph();
-        std::cout << utils::hyper_period;
         while(utils::current_time <= utils::hyper_period *2) // we are going to run simulation with two hyper period times. 
         {
             executor.run_simulation();                      // run a job on the simulator
