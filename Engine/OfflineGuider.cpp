@@ -63,25 +63,26 @@ OfflineGuider::~OfflineGuider()
  * @warning none
  * @todo to be implemented tonight.
  */
-void OfflineGuider::construct_job_precedence_graph()
+void OfflineGuider::construct_job_precedence_graph() 
 {
-    for(int ecu_id = 0; ecu_id < vectors::job_vectors_for_each_ECU.size(); ++ ecu_id )
+    // We will construct job precedence graph at offline state.
+    // For each ECU.
+    for(int ecu_id = 0; ecu_id < vectors::ecu_vector.size(); ++ ecu_id)
     {
-        if(vectors::job_vectors_for_each_ECU.at(ecu_id).size() != 0)
-        {
-            for(int task_id =0; task_id < vectors::job_vectors_for_each_ECU.at(ecu_id).size(); ++ task_id)
-            for (auto job : vectors::job_vectors_for_each_ECU.at(ecu_id).at(task_id))
-            {             
-                construct_start_job_sets(ecu_id, job); // no is_read() condition, because construct_producer_job_sets needs this info aswell.
-                if (job->get_is_write())
-                    construct_finish_job_sets(ecu_id, job);
-                construct_producer_job_sets(ecu_id, job);
-            }
+        //
+        for (auto job : vectors::job_vectors_for_each_ECU.at(ecu_id).at(task_id))
+        {             
+            construct_start_job_sets(ecu_id, job); // no is_read() condition, because construct_producer_job_sets needs this info aswell.
+            if (job->get_is_write())
+                construct_finish_job_sets(ecu_id, job);
+            construct_producer_job_sets(ecu_id, job);
         }
     }
 }
 void OfflineGuider::update_job_precedence_graph()
 {
+    // We will update job precedence graph at online state.
+    // Cut the finished job, and add new job to the graph.
 
 }
 

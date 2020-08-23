@@ -55,15 +55,12 @@ private:
 
     std::vector<std::shared_ptr<Job>> m_history_of_sim_deadline;
     std::vector<std::shared_ptr<Job>> m_job_set_start_det;
-    std::vector<std::shared_ptr<Job>> m_job_set_start_non_det;
     std::vector<std::shared_ptr<Job>> m_job_set_finish_det;
-    std::vector<std::shared_ptr<Job>> m_job_set_finish_non_det;
     std::vector<std::shared_ptr<Job>> m_job_set_pro_con_det;
-    std::vector<std::shared_ptr<Job>> m_job_set_pro_con_non_det;
+
     std::vector<std::shared_ptr<Job>> m_det_predecessors;
     std::vector<std::shared_ptr<Job>> m_det_successors;
-    std::vector<std::shared_ptr<Job>> m_non_det_predecessors;
-    std::vector<std::shared_ptr<Job>> m_non_det_successors;
+
         
 public:
     /**
@@ -71,6 +68,7 @@ public:
      */
     Job();
     Job(std::shared_ptr<Task>, int, int);
+    Job(std::shared_ptr<Task>, std::shared_ptr<Job>);
     ~Job();
     /**
      * Getter & Setter
@@ -103,15 +101,11 @@ public:
 
     
     std::vector<std::shared_ptr<Job>>& get_job_set_start_det();
-    std::vector<std::shared_ptr<Job>>& get_job_set_start_non_det();
     std::vector<std::shared_ptr<Job>>& get_job_set_finish_det();
-    std::vector<std::shared_ptr<Job>>& get_job_set_finish_non_det();
     std::vector<std::shared_ptr<Job>>& get_job_set_pro_con_det();
-    std::vector<std::shared_ptr<Job>>& get_job_set_pro_con_non_det();
     std::vector<std::shared_ptr<Job>>& get_det_prdecessors();
     std::vector<std::shared_ptr<Job>>& get_det_successors();
-    std::vector<std::shared_ptr<Job>>& get_non_det_prdecessors();
-    std::vector<std::shared_ptr<Job>>& get_non_det_successors();
+
 
     void set_is_real_started(bool);
     void set_is_real_finished(bool);
@@ -140,15 +134,10 @@ public:
     void set_real_busy_period_finish_time(int);
     
     void set_job_set_start_det(std::vector<std::shared_ptr<Job>>&);
-    void set_job_set_start_non_det(std::vector<std::shared_ptr<Job>>&);
     void set_job_set_finish_det(std::vector<std::shared_ptr<Job>>&);
-    void set_job_set_finish_non_det(std::vector<std::shared_ptr<Job>>&);
     void set_job_set_pro_con_det(std::vector<std::shared_ptr<Job>>&);
-    void set_job_set_pro_con_non_det(std::vector<std::shared_ptr<Job>>&);
     void set_det_predecessors(std::vector<std::shared_ptr<Job>>&);
     void set_det_successors(std::vector<std::shared_ptr<Job>>&);
-    void set_non_det_predecessors(std::vector<std::shared_ptr<Job>>&);
-    void set_non_det_successors(std::vector<std::shared_ptr<Job>>&);
 
     /**
      * SPECIFIC FUNCTIONS OF JOB CLASS

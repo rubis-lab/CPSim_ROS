@@ -222,7 +222,7 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         std::string task_name = "S" + std::to_string(i);
         int period = -1;
         int offset = -1;
-        int priority = -1;
+        int priority = 1000 + i;
         int callback_type = 1;
         int fet = 10;
         bool is_read = false;

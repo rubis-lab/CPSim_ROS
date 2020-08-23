@@ -71,6 +71,64 @@ Job::Job(std::shared_ptr<Task> task, int job_id, int hyper_period_start)
     m_simulated_release_time = -1;
     m_simulated_start_time = -1;
     m_simulated_finish_time = -1;
+
+    m_is_real_released = false;
+    m_is_real_running = false;
+    m_is_real_started = false;
+    m_is_real_finished = false;
+
+    m_is_simulated_released = false;
+    m_is_simulated_running = false;
+    m_is_simulated_started = false;
+    m_is_simulated_finished = false;
+}
+/**
+ * @fn Job::Job()
+ * @brief the function of basic constructor of Job
+ * @author Seonghyeon Park
+ *  @date 2020-08-20
+ * @details 
+ *  - None
+ * @param none
+ * @return none
+ * @bug none
+ * @warning none
+ * @todo none
+ */
+Job::Job(std::shared_ptr<Task> task, std::shared_ptr<Job> producer)
+{
+    this->set_task_id(task->get_task_id());
+    this->set_task_name(task->get_task_name());
+    this->set_period(task->get_period());
+    this->set_deadline(task->get_deadline());
+    this->set_offset(task->get_offset());
+    this->set_priority(task->get_priority());
+    this->set_callback_type(task->get_callback_type());
+    this->set_fet(task->get_fet());
+    this->set_is_read(task->get_is_read());
+    this->set_is_write(task->get_is_write());
+    this->set_ECU_id(task->get_ECU_id());
+    this->set_producer(task->get_producer());
+    this->set_consumer(task->get_consumer());
+
+    
+    m_job_id = producer->get_job_id();
+    m_real_release_time = producer->get_real_finish_time();
+    m_real_deadline = -1;
+    m_real_start_time = -1;
+    m_simulated_release_time = -1;
+    m_simulated_start_time = -1;
+    m_simulated_finish_time = -1;
+
+    m_is_real_released = false;
+    m_is_real_running = false;
+    m_is_real_started = false;
+    m_is_real_finished = false;
+
+    m_is_simulated_released = false;
+    m_is_simulated_running = false;
+    m_is_simulated_started = false;
+    m_is_simulated_finished = false;
 }
 
 /**
@@ -186,28 +244,16 @@ std::vector<std::shared_ptr<Job>>& Job::get_job_set_start_det()
     return m_job_set_start_det;
 }
 
-std::vector<std::shared_ptr<Job>>& Job::get_job_set_start_non_det()
-{
-    return m_job_set_start_non_det;
-}
 std::vector<std::shared_ptr<Job>>& Job::get_job_set_finish_det()
 {
     return m_job_set_finish_det;
 }
 
-std::vector<std::shared_ptr<Job>>& Job::get_job_set_finish_non_det()
-{
-    return m_job_set_finish_non_det;
-}
 std::vector<std::shared_ptr<Job>>& Job::get_job_set_pro_con_det()
 {
     return m_job_set_pro_con_det;
 }
 
-std::vector<std::shared_ptr<Job>>& Job::get_job_set_pro_con_non_det()
-{
-    return m_job_set_pro_con_non_det;
-}
 std::vector<std::shared_ptr<Job>>& Job::get_det_prdecessors()
 {
     return m_det_predecessors;
@@ -216,15 +262,6 @@ std::vector<std::shared_ptr<Job>>& Job::get_det_prdecessors()
 std::vector<std::shared_ptr<Job>>& Job::get_det_successors()
 {
     return m_det_successors;
-}
-std::vector<std::shared_ptr<Job>>& Job::get_non_det_prdecessors()
-{
-    return m_non_det_predecessors;
-}
-
-std::vector<std::shared_ptr<Job>>& Job::get_non_det_successors()
-{
-    return m_non_det_successors;
 }
 
 void Job::set_is_real_started(bool is_started)
@@ -313,25 +350,13 @@ void Job::set_job_set_start_det(std::vector<std::shared_ptr<Job>>& job_set_start
 {
     m_job_set_start_det = job_set_start_det;
 }
-void Job::set_job_set_start_non_det(std::vector<std::shared_ptr<Job>>& job_set_start_non_det)
-{
-    m_job_set_start_non_det = job_set_start_non_det;
-}
 void Job::set_job_set_finish_det(std::vector<std::shared_ptr<Job>>& job_set_finish_det)
 {
     m_job_set_finish_det = job_set_finish_det;
 }
-void Job::set_job_set_finish_non_det(std::vector<std::shared_ptr<Job>>& job_set_finish_non_det)
-{
-    m_job_set_finish_non_det = job_set_finish_non_det;
-}
 void Job::set_job_set_pro_con_det(std::vector<std::shared_ptr<Job>>& job_set_pro_con_det)
 {
     m_job_set_pro_con_det = job_set_pro_con_det;
-}
-void Job::set_job_set_pro_con_non_det(std::vector<std::shared_ptr<Job>>& job_set_pro_con_non_det)
-{
-    m_job_set_pro_con_non_det = job_set_pro_con_non_det;
 }
 void Job::set_det_predecessors(std::vector<std::shared_ptr<Job>>& predecessors)
 {
@@ -341,15 +366,6 @@ void Job::set_det_successors(std::vector<std::shared_ptr<Job>>& successors)
 {
     m_det_successors = successors;
 }
-void Job::set_non_det_predecessors(std::vector<std::shared_ptr<Job>>& predecessors)
-{
-    m_non_det_predecessors = predecessors;
-}
-void Job::set_non_det_successors(std::vector<std::shared_ptr<Job>>& successors)
-{
-    m_non_det_successors = successors;
-}
-
 
 int Job::calculate_release_time(int period, int offset, int hyper_period_start)
 {

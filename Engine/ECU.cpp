@@ -120,7 +120,18 @@ int ECU::get_num_of_task()
 {
     return m_num_of_task;
 }
-
+int ECU::get_l_busy_period_start_time()
+{
+    return m_l_busy_period_start_time;
+}
+int ECU::get_l_busy_period_finish_time()
+{
+    return m_l_busy_period_finish_time;
+}
+bool ECU::get_is_busy()
+{
+    return m_is_busy;
+}
 /**
  * @fn std::string get_scheduling_policy()
  * @brief getter for scheduling policy
@@ -147,6 +158,10 @@ std::vector<std::shared_ptr<Job>> ECU::get_released_jobset()
 {
     return m_released_jobset;
 }
+std::vector<std::shared_ptr<Job>> ECU::get_finished_jobset()
+{
+    return m_finished_jobset;
+}
 std::vector<std::shared_ptr<Task>> ECU::get_task_set()
 {
     return m_task_set;
@@ -164,6 +179,18 @@ void ECU::set_num_of_task(int num)
 {
     m_num_of_task = num;
 }
+void ECU::set_l_busy_period_start_time(int l_busy_period_start_time)
+{
+    m_l_busy_period_start_time = l_busy_period_start_time;
+}
+void ECU::set_l_busy_period_finish_time(int l_busy_period_finish_time)
+{
+    m_l_busy_period_finish_time = l_busy_period_finish_time;
+}
+void ECU::set_is_busy(bool is_busy)
+{
+    m_is_busy = is_busy;
+}
 void ECU::set_scheduling_policy(std::string sched_policy)
 {
     m_scheduling_policy = sched_policy;
@@ -176,9 +203,18 @@ void ECU::set_released_jobset(std::vector<std::shared_ptr<Job>> released_jobset)
 {
     m_released_jobset = released_jobset;
 }
+void ECU::set_finished_jobset(std::vector<std::shared_ptr<Job>> finished_jobset)
+{
+    m_finished_jobset = finished_jobset;
+}
 void ECU::set_task_set(std::vector<std::shared_ptr<Task>> task_set)
 {
     m_task_set = task_set;
+}
+void ECU::set_who_is_running(std::shared_ptr<Job> job)
+{
+    who_is_running = job;
+    delete_job_from_ready_set(std::move(job));
 }
 
 void ECU::add_task_to_ecu(std::shared_ptr<Task> task)
@@ -198,6 +234,10 @@ void ECU::add_job_to_pending_jobset(std::shared_ptr<Job> job)
 {
     m_pending_jobset.push_back(job);
 }
+void ECU::add_job_to_finished_jobset(std::shared_ptr<Job> job)
+{
+    m_finished_jobset.push_back(std::move(job));
+}
 
 void ECU::delete_job_from_released_jobset(std::shared_ptr<Job> job)
 {
@@ -216,6 +256,16 @@ void ECU::delete_job_from_ready_set(std::shared_ptr<Job> job)
         if(m_ready_set.at(idx) == job)
         {
             m_ready_set.erase(m_ready_set.begin() + idx);
+        }
+    }  
+}
+void ECU::delete_job_from_finished_jobset(std::shared_ptr<Job> job)
+{
+    for(int idx = 0; idx < m_finished_jobset.size(); idx++)
+    {
+        if(m_finished_jobset.at(idx) == job)
+        {
+            m_finished_jobset.erase(m_finished_jobset.begin() + idx);
         }
     }  
 }
