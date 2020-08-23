@@ -53,7 +53,7 @@ Task::Task()
  * @todo none
  */
 Task::Task(std::string task_name, int period, int deadline, int priority, int callback_type,
-            int fet, int offset, bool is_read, bool is_write, int ecu_id)
+            int fet, int offset, bool is_read, bool is_write, int ecu_id, int transaction_id)
 {
     /**
      * Member variable initializaion
@@ -69,10 +69,11 @@ Task::Task(std::string task_name, int period, int deadline, int priority, int ca
     m_is_read = is_read;
     m_is_write = is_write;
     m_ecu_id = ecu_id;
+    m_transaction_id = transaction_id;
 }
 
 Task::Task(std::string task_name, int period, int deadline, int priority, int callback_type,
-            int fet, int offset, bool is_read, bool is_write, int ecu_id,
+            int fet, int offset, bool is_read, bool is_write, int ecu_id, int transaction_id,
             std::string prodcuer, std::string consumer)
 {
     /**
@@ -89,10 +90,11 @@ Task::Task(std::string task_name, int period, int deadline, int priority, int ca
     m_producer_info = prodcuer;
     m_consumer_info = consumer;
     m_ecu_id = ecu_id;
+    m_transaction_id = transaction_id;
 }
 
 Task::Task(std::string task_name, int period, int deadline, int priority, int callback_type,
-            int fet, int offset, bool is_read, bool is_write, int ecu_id,
+            int fet, int offset, bool is_read, bool is_write, int ecu_id, int transaction_id,
             std::shared_ptr<Task> prodcuer, std::shared_ptr<Task> consumer)
 {
     /**
@@ -108,6 +110,7 @@ Task::Task(std::string task_name, int period, int deadline, int priority, int ca
     m_producer = prodcuer;
     m_consumer = consumer;
     m_ecu_id = ecu_id;
+    m_transaction_id = transaction_id;
 }
 
 /**
@@ -162,6 +165,10 @@ std::string Task::get_task_name()
 int Task::get_task_id()
 {
     return m_task_id;
+}
+int Task::get_transaction_id()
+{
+    return m_transaction_id;
 }
 int Task::get_vector_idx()
 {
@@ -236,6 +243,15 @@ int Task::get_fet()
 {
     return m_fet;    
 }
+int Task::get_ECU_id()
+{
+    return m_ecu_id;
+}
+int Task::get_chain_pos()
+{
+    return m_chain_pos;
+}
+
 /**
  * @fn int get_is_read()
  * @brief Getter for task's read constraint
@@ -272,10 +288,6 @@ bool Task::get_is_write()
     return m_is_write;
 }
 
-int Task::get_ECU_id()
-{
-    return m_ecu_id;
-}
 
 std::shared_ptr<Task> Task::get_producer()
 {
@@ -307,6 +319,10 @@ void Task::set_task_name(std::string task_name)
 void Task::set_task_id(int task_id)
 {
     m_task_id = task_id;
+}
+void Task::set_transaction_id(int transaction_id)
+{
+    m_transaction_id = transaction_id;
 }
 void Task::set_vector_idx(int vector_idx)
 {
@@ -346,7 +362,14 @@ void Task::set_fet(int fet)
 {
     m_fet = fet;
 }
-
+void Task::set_ECU_id(int ecu_id)
+{
+    m_ecu_id = ecu_id;
+}
+void Task::set_chain_pos(int chain_pos)
+{
+    m_chain_pos = chain_pos;
+}
 void Task::set_producer(std::shared_ptr<Task> producer)
 {
     m_producer = producer;
@@ -363,10 +386,7 @@ void Task::set_consumer_info(std::string consumer_info)
 {
     m_consumer_info = consumer_info;
 }
-void Task::set_ECU_id(int ecu_id)
-{
-    m_ecu_id = ecu_id;
-}
+
 
 void Task::synchronize_producer_consumer_relation()
 {

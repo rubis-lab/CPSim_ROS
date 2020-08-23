@@ -87,15 +87,14 @@ void Initializer::initialize()
          * Each task can be [0-2] data producer of random selected job.
          */
         random_constraint_selector(0.3, 0.3);
-        random_producer_consumer_generator();
+        transaction_producer_consumer_generator();
     }
                           
-    
     /**
      * Global Hyper Period Initialization
      */
-    utils::hyper_period = utils::calculate_hyper_period(vectors::task_vector);
-    
+    utils::hyper_period = utils::calculate_hyper_period(vectors::timer_vector);
+
     /**
      * Global Logger Initialization
      */    
@@ -111,31 +110,34 @@ void Initializer::random_ecu_generator(int ecu_num)
         std::shared_ptr<ECU> ecu =  std::make_shared<ECU>(100,"RM");
         vectors::ecu_vector.push_back(std::move(ecu));
     }
-    /**
-     * Creating ECU Vector Spaces.
-     */
-    for(int i = 0; i < ecu_num; i++)
-    {
-        std::vector<std::vector<std::shared_ptr<Job>>> v_job_of_ecu;
-        vectors::job_vectors_for_each_ECU.push_back(v_job_of_ecu);
-    }
 }
 
-void Initializer::random_producer_consumer_generator()
+// For transactions, we already set transaction relation with transaction vector.
+// So, using this. 
+// Just, make each task producer and consumer here.
+void Initializer::transaction_producer_consumer_generator()
 {
-    for(auto task : vectors::task_vector)
+    for(auto transaction : vectors::transaction_vector)
     {
-        for(auto consumer : vectors::task_vector)
+        for(int task_idx = 0; task_idx < transaction.size(); task_idx++)
         {
-            if(consumer->get_task_name() == task->get_consumer_info())
+            if(task_idx == transaction.size() - 1)
             {
-                task->add_task_to_consumer(consumer);
-                consumer->add_task_to_producer(task);
+                // THIS IS LAST TASK OF THIS TRANSACTION
+                break;
             }
-        }    
+            else
+            {
+                transaction.at(task_idx)->add_task_to_consumer(transaction.at(task_idx + 1)); 
+                transaction.at(task_idx + 1)->add_task_to_producer(transaction.at(task_idx));
+            }
+        }
     }    
 }
 
+// Write Constraint can be assigned to one transaction.
+// Read Constraint can be assigned to timer callback only(same as transaction also).
+// Then, we can think each constraint can be assigned to a transaction. 
 void Initializer::random_constraint_selector(double read_ratio, double write_ratio)
 {
     int task_num = vectors::task_vector.size();
@@ -206,9 +208,13 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         bool is_read = false;
         bool is_write = false;
         int ecu_id = uniform_ecu_selector();
-        std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id);
+        int transaction_id = i;
+        std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id, transaction_id);
+        task->set_chain_pos(vectors::transaction_vector.at(i).size());
+
         vectors::ecu_vector.at(ecu_id)->add_task_to_ecu(task);
         vectors::task_vector.push_back(task);
+        vectors::timer_vector.push_back(task);
         vectors::transaction_vector.at(i).push_back(task);
     }
     
@@ -224,12 +230,17 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         int offset = -1;
         int priority = 1000 + i;
         int callback_type = 1;
-        int fet = 10;
+        int fet = 1;
         bool is_read = false;
         bool is_write = false;
         int ecu_id = uniform_ecu_selector();
-        std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id);
+        int transaction_id = i;
+        std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id, transaction_id);
+        task->set_chain_pos(vectors::transaction_vector.at(i).size());
+        
+        vectors::ecu_vector.at(ecu_id)->add_task_to_ecu(task);
         vectors::task_vector.push_back(task);
+        vectors::subscriber_vector.push_back(task);
         vectors::transaction_vector.at(i).push_back(task); //TBD
     }
 

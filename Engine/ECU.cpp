@@ -149,7 +149,10 @@ std::string ECU::get_scheduling_policy()
 {
     return m_scheduling_policy;
 }
-
+std::shared_ptr<Job> ECU::get_who_is_running()
+{
+    return who_is_running;
+}
 std::vector<std::shared_ptr<Job>> ECU::get_ecu_ready_set()
 {
     return m_ready_set;
@@ -161,6 +164,10 @@ std::vector<std::shared_ptr<Job>> ECU::get_released_jobset()
 std::vector<std::shared_ptr<Job>> ECU::get_finished_jobset()
 {
     return m_finished_jobset;
+}
+std::vector<std::shared_ptr<Job>> ECU::get_pending_jobset()
+{
+    return m_pending_jobset;
 }
 std::vector<std::shared_ptr<Task>> ECU::get_task_set()
 {
@@ -214,7 +221,6 @@ void ECU::set_task_set(std::vector<std::shared_ptr<Task>> task_set)
 void ECU::set_who_is_running(std::shared_ptr<Job> job)
 {
     who_is_running = job;
-    delete_job_from_ready_set(std::move(job));
 }
 
 void ECU::add_task_to_ecu(std::shared_ptr<Task> task)

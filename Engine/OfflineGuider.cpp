@@ -67,39 +67,20 @@ void OfflineGuider::construct_job_precedence_graph()
 {
     // We will construct job precedence graph at offline state.
     // We construct edges only when a job is related with its data producer-consumer relationship.
-    // for(int ecu_id = 0; ecu_id < vectors::ecu_vector.size(); ++ ecu_id)
-    // {
-    //     //
-    //     for (auto job : vectors::job_vectors_for_each_ECU.at(ecu_id).at(task_id))
-    //     {             
-    //         construct_start_job_sets(ecu_id, job); // no is_read() condition, because construct_producer_job_sets needs this info aswell.
-    //         if (job->get_is_write())
-    //             construct_finish_job_sets(ecu_id, job);
-    //         construct_producer_job_sets(ecu_id, job);
-    //     }
-    // }
-    // For each ECU, we have all job which were finished.
-    // In that ECUs, we set all jobs producer as edges.
+
+    // 1, We gonna merge every ECU's Finished Jobset 
     for(auto ecu : vectors::ecu_vector)
     {
         for(auto job : ecu->get_finished_jobset())
         {
-            // IF THIS JOB IS TIMER JOB, START Transaction Analysis
-            if(job->get_callback_type() == 0)
-            {
-                if(job->get_consumer_job() != 0)
-                {
-                    job->add_job_to_successors(job->get_consumer_job());
-                    for(auto consumer : ecu->get_finished_jobset())
-                    {
-                        if(consumer->get_producer_job() == job)
-                        {
-                            consumer->add_job_to_predecessors(job);
-                        }
-                    }
-                }
-            }
+            vectors::job_precedence_graph.push_back(job);
         }
+    }
+
+    // 2, Recurrently, 
+    for(auto job : vectors::job_precedence_graph)
+    {   
+        recurrent_transaction_analysis(job);
     }
 }
 void OfflineGuider::update_job_precedence_graph()
@@ -110,14 +91,30 @@ void OfflineGuider::update_job_precedence_graph()
 }
 void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
 {
-    if(job->get_consumer_job() != nullptr)
+    for(int task_idx = 0; task_idx < vectors::transaction_vector.at(job->get_transaction_id()).size(); task_idx++)
     {
-        vectors::ecu_vector.at(job->get_ECU_id())->fini1 
-        recurrent_transaction_analysis(job->get_consumer_job());
+        if(job->get_chain_pos() > task_idx)
+        {
+            for(auto find_job : vectors::job_precedence_graph)
+            {
+                if(find_job->get_task_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_task_id() && 
+                   find_job->get_job_id() == job->get_job_id())
+                {
+                    job->add_job_to_predecessors(find_job);
+                }
+            }
+            
+        }
+        else if(job->get_chain_pos() < task_idx)
+        {
+            for(auto find_job : vectors::job_precedence_graph)
+            {
+                if(find_job->get_task_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_task_id() && 
+                   find_job->get_job_id() == job->get_job_id())
+                {
+                    job->add_job_to_successors(find_job);
+                }
+            }
+        }
     }
-    else
-    {
-        // NO CONSUMER
-    }
-    
 }

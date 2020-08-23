@@ -52,7 +52,10 @@ namespace vectors
     inline std::vector<std::vector<std::vector<std::shared_ptr<Job>>>> job_vectors_for_each_ECU;
     inline std::vector<std::shared_ptr<ECU>> ecu_vector;
     inline std::vector<std::shared_ptr<Task>> task_vector;
+    inline std::vector<std::shared_ptr<Task>> timer_vector;
+    inline std::vector<std::shared_ptr<Task>> subscriber_vector;
     inline std::vector<std::vector<std::shared_ptr<Task>>> transaction_vector;
+    inline std::vector<std::shared_ptr<Job>> job_precedence_graph;
 }
 
 namespace global_object

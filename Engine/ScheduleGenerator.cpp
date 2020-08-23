@@ -153,11 +153,18 @@ void ScheduleGenerator::generate_schedule_offline()
                     ecu->get_who_is_running()->set_real_finish_time(ecu->get_who_is_running()->get_real_start_time() + ecu->get_who_is_running()->get_fet());
                     ecu->get_who_is_running()->set_is_real_started(true);
                     ecu->get_who_is_running()->set_is_real_running(true);
-
-                    std::shared_ptr<Job> consumer_job = std::make_shared<Job>(ecu->get_who_is_running()->get_consumer(),ecu->get_who_is_running()) ;
-                    ecu->get_who_is_running()->set_consumer_job(consumer_job);
-                    consumer_job->set_producer_job(ecu->get_who_is_running());
-                    vectors::ecu_vector.at(consumer_job->get_ECU_id())->add_job_to_released_jobset(std::move(consumer_job));
+                    
+                    if(ecu->get_who_is_running()->get_consumer() == nullptr)
+                    {
+                        // THERE IS NO CONSUMER TO THIS JOB
+                    }
+                    else
+                    {
+                        std::shared_ptr<Job> consumer_job = std::make_shared<Job>(ecu->get_who_is_running()->get_consumer(),ecu->get_who_is_running()) ;
+                        ecu->get_who_is_running()->set_consumer_job(consumer_job);
+                        consumer_job->set_producer_job(ecu->get_who_is_running());
+                        vectors::ecu_vector.at(consumer_job->get_ECU_id())->add_job_to_released_jobset(std::move(consumer_job));
+                    }
                 }
                 else // IF ready_set is empty, we do nothing.
                 {
@@ -172,7 +179,8 @@ void ScheduleGenerator::generate_schedule_offline()
                 {
                     ecu->get_who_is_running()->set_is_real_finished(true);
                     ecu->get_who_is_running()->set_is_real_running(false);
-
+                    
+                    ecu->delete_job_from_ready_set(ecu->get_who_is_running());
                     ecu->add_job_to_finished_jobset(ecu->get_who_is_running());
                     ecu->set_who_is_running(nullptr);
                     // IF READY SET IS EMPTY AFTER THE JOB FINISHED, THEN FINISH THE BUSY PERIOD
@@ -180,10 +188,44 @@ void ScheduleGenerator::generate_schedule_offline()
                     {   
                         ecu->set_is_busy(false);
                         ecu->set_l_busy_period_finish_time(offline_current_time);
+                        if(ecu->get_pending_jobset().size() != 0)
+                        {
+                                ecu->copy_pending_jobset_to_ready_set();
+                                ecu->flush_pending_jobset();    
+                        }
                     }
                     else
                     {
-                        // DO NOTHING
+                        int minimum_priority_value = INT_MAX;
+                        int minimum_idx = 0;
+                        for(int job_idx = 0; job_idx < ecu->get_ecu_ready_set().size(); job_idx++)
+                        {
+                            if(ecu->get_ecu_ready_set().at(job_idx)->get_priority() < minimum_priority_value)
+                            {
+                                minimum_priority_value = ecu->get_ecu_ready_set().at(job_idx)->get_priority();
+                                minimum_idx = job_idx;
+                            }
+                        }
+                        
+                        // -------------------------------------------------------------------------------------
+                        // run a highest job, and if the job has subscriber, then set its release time as job's finish time and add it to released job set
+                        ecu->set_who_is_running(ecu->get_ecu_ready_set().at(minimum_idx));
+                        ecu->get_who_is_running()->set_real_start_time(offline_current_time);
+                        ecu->get_who_is_running()->set_real_finish_time(ecu->get_who_is_running()->get_real_start_time() + ecu->get_who_is_running()->get_fet());
+                        ecu->get_who_is_running()->set_is_real_started(true);
+                        ecu->get_who_is_running()->set_is_real_running(true);
+                        
+                        if(ecu->get_who_is_running()->get_consumer() == nullptr)
+                        {
+                            // THERE IS NO CONSUMER TO THIS JOB
+                        }
+                        else
+                        {
+                            std::shared_ptr<Job> consumer_job = std::make_shared<Job>(ecu->get_who_is_running()->get_consumer(),ecu->get_who_is_running()) ;
+                            ecu->get_who_is_running()->set_consumer_job(consumer_job);
+                            consumer_job->set_producer_job(ecu->get_who_is_running());
+                            vectors::ecu_vector.at(consumer_job->get_ECU_id())->add_job_to_released_jobset(std::move(consumer_job));
+                        }
                     }
                     
                 }
