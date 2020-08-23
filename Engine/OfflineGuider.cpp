@@ -66,16 +66,39 @@ OfflineGuider::~OfflineGuider()
 void OfflineGuider::construct_job_precedence_graph() 
 {
     // We will construct job precedence graph at offline state.
-    // For each ECU.
-    for(int ecu_id = 0; ecu_id < vectors::ecu_vector.size(); ++ ecu_id)
+    // We construct edges only when a job is related with its data producer-consumer relationship.
+    // for(int ecu_id = 0; ecu_id < vectors::ecu_vector.size(); ++ ecu_id)
+    // {
+    //     //
+    //     for (auto job : vectors::job_vectors_for_each_ECU.at(ecu_id).at(task_id))
+    //     {             
+    //         construct_start_job_sets(ecu_id, job); // no is_read() condition, because construct_producer_job_sets needs this info aswell.
+    //         if (job->get_is_write())
+    //             construct_finish_job_sets(ecu_id, job);
+    //         construct_producer_job_sets(ecu_id, job);
+    //     }
+    // }
+    // For each ECU, we have all job which were finished.
+    // In that ECUs, we set all jobs producer as edges.
+    for(auto ecu : vectors::ecu_vector)
     {
-        //
-        for (auto job : vectors::job_vectors_for_each_ECU.at(ecu_id).at(task_id))
-        {             
-            construct_start_job_sets(ecu_id, job); // no is_read() condition, because construct_producer_job_sets needs this info aswell.
-            if (job->get_is_write())
-                construct_finish_job_sets(ecu_id, job);
-            construct_producer_job_sets(ecu_id, job);
+        for(auto job : ecu->get_finished_jobset())
+        {
+            // IF THIS JOB IS TIMER JOB, START Transaction Analysis
+            if(job->get_callback_type() == 0)
+            {
+                if(job->get_consumer_job() != 0)
+                {
+                    job->add_job_to_successors(job->get_consumer_job());
+                    for(auto consumer : ecu->get_finished_jobset())
+                    {
+                        if(consumer->get_producer_job() == job)
+                        {
+                            consumer->add_job_to_predecessors(job);
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -85,32 +108,16 @@ void OfflineGuider::update_job_precedence_graph()
     // Cut the finished job, and add new job to the graph.
 
 }
-
-// To affect us, a job must be higher priority, and from another task.
-// Current jobs WCBP should start before or at same time as the high job's release time.
-// comparing jobs real release should be <= lst of current job.
-// Also their lst should be earlier than our est to be deterministic.
-void OfflineGuider::construct_start_job_sets(int ecu_id, std::shared_ptr<Job>& current_job)
+void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
 {
-
-}
-
-void OfflineGuider::construct_finish_job_sets(int ecu_id, std::shared_ptr<Job>& current_job)
-{
-
-}
-
-// Constructs the job set that represents all the jobs that produce us.
-// Make sure that start time job sets are constructed before calling this.
-// Push back potential_producer items into deterministic set.
-// if his lst < current job's est
-// Otherwise push back into non-deterministic.
-
-// Push back job_set start items into deterministic set.
-// if his lst < current job's est.
-// Otherwise push back into non-deterministic.
-// Push back deterministic into deterministic if he isn't nullptr.
-void OfflineGuider::construct_producer_job_sets(int ecu_id, std::shared_ptr<Job>& current_job)
-{
-
+    if(job->get_consumer_job() != nullptr)
+    {
+        vectors::ecu_vector.at(job->get_ECU_id())->fini1 
+        recurrent_transaction_analysis(job->get_consumer_job());
+    }
+    else
+    {
+        // NO CONSUMER
+    }
+    
 }

@@ -54,14 +54,12 @@ private:
     double m_simulated_finish_time;
 
     std::vector<std::shared_ptr<Job>> m_history_of_sim_deadline;
-    std::vector<std::shared_ptr<Job>> m_job_set_start_det;
-    std::vector<std::shared_ptr<Job>> m_job_set_finish_det;
-    std::vector<std::shared_ptr<Job>> m_job_set_pro_con_det;
-
     std::vector<std::shared_ptr<Job>> m_det_predecessors;
     std::vector<std::shared_ptr<Job>> m_det_successors;
+    std::shared_ptr<Job> m_producer_job;
+    std::shared_ptr<Job> m_consumer_job;
+    
 
-        
 public:
     /**
      * Constructor & Destructor
@@ -99,9 +97,8 @@ public:
     double get_simulated_execution_time();
     std::vector<std::shared_ptr<Job>> get_history();
 
-    
-    std::vector<std::shared_ptr<Job>>& get_job_set_start_det();
-    std::vector<std::shared_ptr<Job>>& get_job_set_finish_det();
+    std::shared_ptr<Job> get_producer_job();
+    std::shared_ptr<Job> get_consumer_job();
     std::vector<std::shared_ptr<Job>>& get_job_set_pro_con_det();
     std::vector<std::shared_ptr<Job>>& get_det_prdecessors();
     std::vector<std::shared_ptr<Job>>& get_det_successors();
@@ -133,8 +130,8 @@ public:
     void set_real_busy_period_start_time(int);
     void set_real_busy_period_finish_time(int);
     
-    void set_job_set_start_det(std::vector<std::shared_ptr<Job>>&);
-    void set_job_set_finish_det(std::vector<std::shared_ptr<Job>>&);
+    void set_producer_job(std::shared_ptr<Job>);
+    void set_consumer_job(std::shared_ptr<Job>);
     void set_job_set_pro_con_det(std::vector<std::shared_ptr<Job>>&);
     void set_det_predecessors(std::vector<std::shared_ptr<Job>>&);
     void set_det_successors(std::vector<std::shared_ptr<Job>>&);
@@ -148,6 +145,11 @@ public:
     void update_simulated_deadline();
     double min_simulated_deadline_det_successor();
     void add_history(std::shared_ptr<Job>);
+    void add_job_to_successors(std::shared_ptr<Job>);
+    void add_job_to_predecessors(std::shared_ptr<Job>);
+    void delete_job_from_successors(std::shared_ptr<Job>);
+    void delete_job_from_predecessors(std::shared_ptr<Job>);
+    void copy_successor_successors(std::shared_ptr<Job>);
 };
 
 #endif

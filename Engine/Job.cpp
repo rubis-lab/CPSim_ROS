@@ -238,22 +238,14 @@ double Job::get_simulated_execution_time()
     return std::floor(m_simulated_execution_time*10)/10;
 }
 
-
-std::vector<std::shared_ptr<Job>>& Job::get_job_set_start_det()
+std::shared_ptr<Job> Job::get_producer_job()
 {
-    return m_job_set_start_det;
+    return m_producer_job;
 }
-
-std::vector<std::shared_ptr<Job>>& Job::get_job_set_finish_det()
+std::shared_ptr<Job> Job::get_consumer_job()
 {
-    return m_job_set_finish_det;
+    return m_consumer_job;
 }
-
-std::vector<std::shared_ptr<Job>>& Job::get_job_set_pro_con_det()
-{
-    return m_job_set_pro_con_det;
-}
-
 std::vector<std::shared_ptr<Job>>& Job::get_det_prdecessors()
 {
     return m_det_predecessors;
@@ -346,17 +338,13 @@ void Job::set_simulated_execution_time(double simulated_execution_time)
 {
     m_simulated_execution_time = std::floor(simulated_execution_time*10)/10;
 }
-void Job::set_job_set_start_det(std::vector<std::shared_ptr<Job>>& job_set_start_det)
+void Job::set_producer_job(std::shared_ptr<Job> job)
 {
-    m_job_set_start_det = job_set_start_det;
+    m_producer_job = job;
 }
-void Job::set_job_set_finish_det(std::vector<std::shared_ptr<Job>>& job_set_finish_det)
+void Job::set_consumer_job(std::shared_ptr<Job> job)
 {
-    m_job_set_finish_det = job_set_finish_det;
-}
-void Job::set_job_set_pro_con_det(std::vector<std::shared_ptr<Job>>& job_set_pro_con_det)
-{
-    m_job_set_pro_con_det = job_set_pro_con_det;
+    m_consumer_job = job;
 }
 void Job::set_det_predecessors(std::vector<std::shared_ptr<Job>>& predecessors)
 {
@@ -452,4 +440,37 @@ std::vector<std::shared_ptr<Job>> Job::get_history()
 void Job::add_history(std::shared_ptr<Job> new_deadline)
 {
     m_history_of_sim_deadline.push_back(new_deadline);
+}
+
+void Job::add_job_to_predecessors(std::shared_ptr<Job> job)
+{
+    m_det_predecessors.push_back(job);
+}
+void Job::add_job_to_successors(std::shared_ptr<Job> job)
+{
+    m_det_successors.push_back(job);
+}
+void Job::delete_job_from_predecessors(std::shared_ptr<Job> job)
+{
+    for(int idx = 0; idx < m_det_predecessors.size(); idx++)
+    {
+        if(m_det_predecessors.at(idx) == job)
+        {
+            m_det_predecessors.erase(m_det_predecessors.begin() + idx);
+        }
+    }
+}
+void Job::delete_job_from_successors(std::shared_ptr<Job> job)
+{
+    for(int idx = 0; idx < m_det_successors.size(); idx++)
+    {
+        if(m_det_successors.at(idx) == job)
+        {
+            m_det_successors.erase(m_det_successors.begin() + idx);
+        }
+    }
+}
+void Job::copy_successor_successors(std::shared_ptr<Job> job)
+{
+    m_det_successors.insert(m_det_successors.end(), job->get_det_successors().begin(),job->get_det_successors().end());
 }

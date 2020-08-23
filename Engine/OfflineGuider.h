@@ -23,10 +23,8 @@ public:
      * Generate Offline Guider
      */
     void construct_job_precedence_graph();
-    void construct_start_job_sets(int ecu_id, std::shared_ptr<Job>& current_job);
-    void construct_finish_job_sets(int ecu_id, std::shared_ptr<Job>& current_job);
-    void construct_producer_job_sets(int ecu_id, std::shared_ptr<Job>& current_job);
     void update_job_precedence_graph();
+    void recurrent_transaction_analysis(std::shared_ptr<Job> job);
 };
 
 #endif

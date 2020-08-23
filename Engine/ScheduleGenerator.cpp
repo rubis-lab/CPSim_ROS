@@ -155,8 +155,9 @@ void ScheduleGenerator::generate_schedule_offline()
                     ecu->get_who_is_running()->set_is_real_running(true);
 
                     std::shared_ptr<Job> consumer_job = std::make_shared<Job>(ecu->get_who_is_running()->get_consumer(),ecu->get_who_is_running()) ;
+                    ecu->get_who_is_running()->set_consumer_job(consumer_job);
+                    consumer_job->set_producer_job(ecu->get_who_is_running());
                     vectors::ecu_vector.at(consumer_job->get_ECU_id())->add_job_to_released_jobset(std::move(consumer_job));
-
                 }
                 else // IF ready_set is empty, we do nothing.
                 {
