@@ -97,7 +97,90 @@ void Executor::set_current_hyper_period_end(int current_hyper_period_end)
  */
 bool Executor::run_simulation()
 {
-    //run a job
+    // EDF
+    if(m_simulator_scheduler_mode == 0)
+    {
+        // IF SIMULATOR IS IDLE
+        if(is_busy == false)
+        {
+            is_busy = true;
+            int min_deadline = INT_MAX;
+            int min_idx = 0;
+            for(int job_idx = 0; job_idx < m_simulation_ready_queue.size(); job_idx++)
+            {
+                if(m_simulation_ready_queue.at(job_idx)->get_simulated_deadline() < min_deadline)
+                {
+                    min_idx = job_idx;
+                    min_deadline = m_simulation_ready_queue.at(job_idx)->get_simulated_deadline();
+                }
+            }
+
+            who_is_running = m_simulation_ready_queue.at(min_idx);
+            who_is_running->set_is_simulated_running(true);
+            who_is_running->set_is_simulated_started(true);
+            who_is_running->set_simulated_start_time(utils::current_time);
+            who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
+            return true;
+        }
+        else // IF SIMULATOR IS BUSY,
+        {
+            if(who_is_running->get_simulated_finish_time() == utils::current_time)
+            {
+                who_is_running->set_is_simulated_finished(true);
+                if(who_is_running->get_simulated_deadline() < who_is_running->get_simulated_finish_time())
+                {
+                    return false;
+                }
+                else
+                {
+                    if(m_simulation_ready_queue.size() != 0)
+                    {
+                        int min_deadline = INT_MAX;
+                        int min_idx = 0;
+                        for(int job_idx = 0; job_idx < m_simulation_ready_queue.size(); job_idx++)
+                        {
+                            if(m_simulation_ready_queue.at(job_idx)->get_simulated_deadline() < min_deadline)
+                            {
+                                min_idx = job_idx;
+                                min_deadline = m_simulation_ready_queue.at(job_idx)->get_simulated_deadline();
+                            }
+                        }
+
+                        who_is_running = m_simulation_ready_queue.at(min_idx);
+                        who_is_running->set_is_simulated_running(true);
+                        who_is_running->set_is_simulated_started(true);
+                        who_is_running->set_simulated_start_time(utils::current_time);
+                        who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
+                    }   
+                    else
+                    {
+                        who_is_running = nullptr;
+                        is_busy = false;
+                        return true;
+                    }
+                }
+                
+            }
+            else
+            {
+                return true;
+            }
+            
+        }
+    }
+    else // ROS2
+    {
+        // IDLE
+        if(is_busy == false)
+        {
+
+        }
+        else // BUSY
+        {
+            
+        }
+    }
+    
     return true;
 }
 
@@ -111,49 +194,16 @@ void Executor::change_execution_time()
 
 void Executor::assign_deadline_for_simulated_jobs()
 {
-    for (auto job : vectors::job_vector_of_simulator)
+    for (auto job : vectors::job_precedence_graph)
     {
         if(job->get_is_simulated_finished() == false || job->get_is_simulated_released() == false)
             job->initialize_simulated_deadline();
     }
-    for (auto job : vectors::job_vector_of_simulator)
+    for (auto job : vectors::job_precedence_graph)
     {
         if(job->get_is_simulated_finished() == false || job->get_is_simulated_released() == false)
             job->update_simulated_deadline();
     } 
-}
-
-void Executor::move_ecus_jobs_to_simulator()
-{
-    vectors::job_vector_of_simulator.clear();
-    for(int i = 0; i < vectors::job_vectors_for_each_ECU.size(); i++ )
-    {
-        for(int task_id = 0; task_id < vectors::job_vectors_for_each_ECU.at(i).size(); ++task_id)
-        {
-            vectors::job_vector_of_simulator.insert(vectors::job_vector_of_simulator.end(), vectors::job_vectors_for_each_ECU.at(i).at(task_id).begin(), vectors::job_vectors_for_each_ECU.at(i).at(task_id).end());
-            vectors::job_vectors_for_each_ECU.at(i).at(task_id).clear();
-        }
-    }
-}
-
-void Executor::update_all(std::shared_ptr<Job> last_simulated_job)
-{    
-    /**
-     * UPDATE THE SUCCESSORS' PREDECESSORS JOB SET
-     * ACTUAL START TIME
-     * ACTUAL FINISH TIME
-     * UPDATED EST
-     * UPDATED LST
-     * UPDATED EFT
-     * UPDATED LFT
-     * 
-     * JOBSET START TIME
-     * JOBSET FINISH TIME
-     * JOBSET PROCON
-     * 
-     * DET_PREDECESSOR
-     * DET_SUCCESSOR
-     */
 }
 
 void Executor::update_simulated_deadlines(int job_index)
@@ -184,4 +234,41 @@ bool Executor::simulatability_analysis()
 {
     bool is_simulatable = !check_deadline_miss();
     return is_simulatable;
+}
+void Executor::check_job_precedence_graph()
+{
+    for(auto job : vectors::job_precedence_graph)
+    {
+        // READ CONSTRAINED JOB MUST WAIT ITS REAL START TIME
+        if(job->get_is_read() == true)
+        {
+            if(job->get_real_start_time() > utils::current_time)
+            {
+                continue;
+            }
+        }
+        
+        // SELECT A JOB WHICH DON'T HAVE ANY PREDECESSOR
+        if(job->get_det_prdecessors().size() == 0)
+        {
+            job->set_simulated_release_time(utils::current_time);
+            job->set_is_simulated_released(true);
+            m_simulation_ready_queue.push_back(job);
+            delete_job_from_job_precedence_graph(job);        
+        }
+        else
+        {
+            continue;
+        }
+    }
+}
+void Executor::delete_job_from_job_precedence_graph(std::shared_ptr<Job> job)
+{
+    for(int idx = 0; idx < vectors::job_precedence_graph.size(); idx++)
+    {
+        if(vectors::job_precedence_graph.at(idx) == job)
+        {
+            vectors::job_precedence_graph.erase(vectors::job_precedence_graph.begin() + idx);
+        }
+    }  
 }

@@ -19,6 +19,10 @@ private:
     int m_current_hyper_period_index;
     int m_current_hyper_period_start;
     int m_current_hyper_period_end;
+    int m_simulator_scheduler_mode; // 0 : EDF, 1 : ROS2
+    bool is_busy;
+    std::shared_ptr<Job> who_is_running;
+    std::vector<std::shared_ptr<Job>> m_simulation_ready_queue;
 public:
     /**
      * Constructor & Destructor
@@ -32,26 +36,29 @@ public:
     int get_current_hyper_period_index();
     int get_current_hyper_period_start();
     int get_current_hyper_period_end();
+    int get_simulator_scheduler_mode();
 
     void set_current_hyper_period_index(int); 
     void set_current_hyper_period_start(int);
     void set_current_hyper_period_end(int);
+    void set_simulator_scheduler_mode(int);
 
     /**
      * Simulation Member Functions
      */
     void random_execution_time_generator();
-    void move_ecus_jobs_to_simulator();
-    void update_all(std::shared_ptr<Job>);
     void update_simulated_deadlines(int);
     void update_jobset(std::shared_ptr<Job>);
     bool run_simulation();
     void change_execution_time();
 
+    void check_job_precedence_graph();
+    void delete_job_from_job_precedence_graph(std::shared_ptr<Job>);
     void assign_deadline_for_simulated_jobs();
     void assign_predecessors_successors();
     bool check_deadline_miss();
     bool simulatability_analysis();
+    void clear_simulation_ready_queue();
 };
 
 #endif
