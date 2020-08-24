@@ -60,9 +60,11 @@ int main(int argc, char *argv[])
      * SYNTHETIC WORKLOAD SIMULATION OPTIONS
      */
     int epochs = 1;
-    int simulatable_count = 0;
-    int nonsimulatable_count = 0;
-    
+    int edf_simulatable_count = 0;
+    int ros2_simulatable_count = 0;
+    int edf_non_simulatable_count = 0;
+    int ros2_non_simulatable_count = 0;
+
     for(int i = 0; i < epochs; i++) // Initializer, ScheduleSimulator, OfflineGuider and Executer will be reset due to going out of scope at each loop.
     {
         /** [Initialization with Specification]
@@ -79,7 +81,8 @@ int main(int argc, char *argv[])
 
         executor.set_simulator_scheduler_mode(0); // EDF Scheduling Mode
         executor.assign_deadline_for_simulated_jobs();
-        while(utils::current_time <= utils::hyper_period *2 && is_simulatable) // we are going to run simulation with two hyper period times. 
+    
+        while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
         {
             // EDF
             executor.check_job_precedence_graph();
@@ -88,18 +91,48 @@ int main(int argc, char *argv[])
             offline_guider.update_job_precedence_graph();   // update job_precedence_graph
             utils::current_time = utils::current_time + 0.1;
         }
-
+        if(is_simulatable == true)
+        {
+            edf_simulatable_count ++;
+        }
+        else
+        {
+            edf_non_simulatable_count++;
+        }
+        
+        is_simulatable = true;
         utils::current_time = 0;
+        vectors::job_precedence_graph.clear();
+        for(auto ecu : vectors::ecu_vector)
+        {
+            ecu->clear_every_jobset();
+        }
+        schedule_generator.generate_schedule_offline();
         executor.set_simulator_scheduler_mode(1); // ROS2 Scheduling Mode
         executor.assign_deadline_for_simulated_jobs();
-        while(utils::current_time <= utils::hyper_period *2 && is_simulatable) // we are going to run simulation with two hyper period times. 
+        for(auto ecu : vectors::ecu_vector)
+        {
+            for(auto job : ecu->get_finished_jobset())
+            {
+                vectors::released_set.push_back(job);
+            }
+        }
+        while(utils::current_time <= utils::hyper_period && is_simulatable) // we are going to run simulation with two hyper period times. 
         {
             // ROS2 EXECUTOR
-            executor.check_job_precedence_graph();
+            executor.check_ros2_ready_set();
             executor.run_simulation();                      // run a job on the simulator
             schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
             offline_guider.update_job_precedence_graph();   // update job_precedence_graph
             utils::current_time = utils::current_time + 0.1;
+        }
+        if(is_simulatable == true)
+        {
+            ros2_simulatable_count ++;
+        }
+        else
+        {
+            ros2_non_simulatable_count++;
         }
     }
     return 0;

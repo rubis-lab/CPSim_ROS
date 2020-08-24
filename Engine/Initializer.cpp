@@ -140,21 +140,21 @@ void Initializer::transaction_producer_consumer_generator()
 // Then, we can think each constraint can be assigned to a transaction. 
 void Initializer::random_constraint_selector(double read_ratio, double write_ratio)
 {
-    int task_num = vectors::task_vector.size();
-    int number_of_read = std::ceil(read_ratio * task_num); //read ratio is 30%
-    int number_of_write = std::ceil(write_ratio * task_num); //write ratio is 30%
+    int transaction_num = vectors::transaction_vector.size();
+    int number_of_read = std::ceil(read_ratio * transaction_num); //read ratio is 30%
+    int number_of_write = std::ceil(write_ratio * transaction_num); //write ratio is 30%
 
     int selector = 0;
     while(number_of_read != 0)
     {
-        selector = rand() % vectors::task_vector.size();                                                   // Sync jobs can only read from Init jobs (gpu wait time).
-        if(vectors::task_vector.at(selector)->get_is_read() == true)
+        selector = rand() % vectors::transaction_vector.size();                                                   // Sync jobs can only read from Init jobs (gpu wait time).
+        if(vectors::transaction_vector.at(selector).at(0)->get_is_read() == true)
         {
             continue;
         }
         else
         {
-            vectors::task_vector.at(selector)->set_is_read(true);
+            vectors::transaction_vector.at(selector).at(0)->set_is_read(true);
             number_of_read--;
         }
         
@@ -162,14 +162,14 @@ void Initializer::random_constraint_selector(double read_ratio, double write_rat
 
     while(number_of_write != 0)
     {
-        selector = rand() % vectors::task_vector.size();                                                                    // Init jobs only write to the gpu.
-        if(vectors::task_vector.at(rand() % vectors::task_vector.size())->get_is_write() == true)
+        selector = rand() % vectors::transaction_vector.size();                                                             // Init jobs only write to the gpu.
+        if(vectors::transaction_vector.at(selector).at(vectors::transaction_vector.at(selector).size()-1)->get_is_write() == true)
         {
             continue;
         }
         else
         {
-            vectors::task_vector.at(selector)->set_is_write(true);
+            vectors::transaction_vector.at(selector).at(vectors::transaction_vector.at(selector).size()-1)->set_is_write(true);
             number_of_write--;
         }
     }
@@ -211,7 +211,7 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         int transaction_id = i;
         std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id, transaction_id);
         task->set_chain_pos(vectors::transaction_vector.at(i).size());
-
+        
         vectors::ecu_vector.at(ecu_id)->add_task_to_ecu(task);
         vectors::task_vector.push_back(task);
         vectors::timer_vector.push_back(task);

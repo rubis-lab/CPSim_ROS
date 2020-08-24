@@ -90,5 +90,6 @@ public:
     void delete_job_from_finished_jobset(std::shared_ptr<Job>);
     void copy_pending_jobset_to_ready_set();
     void flush_pending_jobset(); 
+    void clear_every_jobset();
 };
 #endif

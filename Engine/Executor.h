@@ -23,6 +23,7 @@ private:
     bool is_busy;
     std::shared_ptr<Job> who_is_running;
     std::vector<std::shared_ptr<Job>> m_simulation_ready_queue;
+    std::vector<std::shared_ptr<Job>> m_ready_set;
 public:
     /**
      * Constructor & Destructor
@@ -47,16 +48,16 @@ public:
      * Simulation Member Functions
      */
     void random_execution_time_generator();
-    void update_simulated_deadlines(int);
     void update_jobset(std::shared_ptr<Job>);
     bool run_simulation();
-    void change_execution_time();
-
+    
     void check_job_precedence_graph();
+    void check_ros2_ready_set();
     void delete_job_from_job_precedence_graph(std::shared_ptr<Job>);
+    void delete_job_from_simulation_ready_queue(std::shared_ptr<Job>);
+    void delete_job_from_simulation_ready_set(std::shared_ptr<Job>);
     void assign_deadline_for_simulated_jobs();
     void assign_predecessors_successors();
-    bool check_deadline_miss();
     bool simulatability_analysis();
     void clear_simulation_ready_queue();
 };

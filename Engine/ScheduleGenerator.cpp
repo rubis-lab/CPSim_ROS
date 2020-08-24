@@ -287,5 +287,4 @@ void ScheduleGenerator::generate_job_instances_for_hyper_period()
             }   
         }
     }
-    
 }

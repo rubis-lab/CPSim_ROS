@@ -252,6 +252,7 @@ void ECU::delete_job_from_released_jobset(std::shared_ptr<Job> job)
         if(m_released_jobset.at(idx) == job)
         {
             m_released_jobset.erase(m_released_jobset.begin() + idx);
+            break;
         }
     }
 }
@@ -262,6 +263,7 @@ void ECU::delete_job_from_ready_set(std::shared_ptr<Job> job)
         if(m_ready_set.at(idx) == job)
         {
             m_ready_set.erase(m_ready_set.begin() + idx);
+            break;
         }
     }  
 }
@@ -272,6 +274,7 @@ void ECU::delete_job_from_finished_jobset(std::shared_ptr<Job> job)
         if(m_finished_jobset.at(idx) == job)
         {
             m_finished_jobset.erase(m_finished_jobset.begin() + idx);
+            break;
         }
     }  
 }
@@ -282,4 +285,11 @@ void ECU::copy_pending_jobset_to_ready_set()
 void ECU::flush_pending_jobset()
 {
     m_pending_jobset.clear();
+}
+void ECU::clear_every_jobset()
+{
+    m_ready_set.clear();
+    m_released_jobset.clear();
+    m_pending_jobset.clear();
+    m_finished_jobset.clear();
 }

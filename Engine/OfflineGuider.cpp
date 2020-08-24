@@ -76,7 +76,7 @@ void OfflineGuider::construct_job_precedence_graph()
             vectors::job_precedence_graph.push_back(job);
         }
     }
-
+     
     // 2, Recurrently, 
     for(auto job : vectors::job_precedence_graph)
     {   
@@ -85,8 +85,6 @@ void OfflineGuider::construct_job_precedence_graph()
 }
 void OfflineGuider::update_job_precedence_graph()
 {
-    // We will update job precedence graph at online state.
-    // Cut the finished job, and add new job to the graph.
 
 }
 void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
@@ -97,9 +95,13 @@ void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
         {
             for(auto find_job : vectors::job_precedence_graph)
             {
-                if(find_job->get_task_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_task_id() && 
+                if(find_job->get_transaction_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_transaction_id() && 
                    find_job->get_job_id() == job->get_job_id())
                 {
+                    if(find_job == job)
+                    {
+                        continue;
+                    }
                     job->add_job_to_predecessors(find_job);
                 }
             }
@@ -109,12 +111,24 @@ void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
         {
             for(auto find_job : vectors::job_precedence_graph)
             {
-                if(find_job->get_task_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_task_id() && 
+                if(find_job->get_transaction_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_transaction_id() && 
                    find_job->get_job_id() == job->get_job_id())
                 {
+                    if(find_job == job)
+                    {
+                        continue;
+                    }
                     job->add_job_to_successors(find_job);
                 }
             }
+        }
+    }
+    for(auto find_job : vectors::job_precedence_graph)
+    {
+        if( (job->get_transaction_id() == find_job->get_transaction_id()) && (job->get_job_id() < find_job->get_job_id()) && (job->get_task_id() == find_job->get_task_id()))
+        {
+            job->add_job_to_successors(find_job);
+            find_job->add_job_to_predecessors(job);
         }
     }
 }
