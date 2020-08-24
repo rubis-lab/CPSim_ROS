@@ -54,6 +54,7 @@ public:
     void check_job_precedence_graph();
     void check_ros2_ready_set();
     void delete_job_from_job_precedence_graph(std::shared_ptr<Job>);
+    void delete_job_from_released_set(std::shared_ptr<Job>);
     void delete_job_from_simulation_ready_queue(std::shared_ptr<Job>);
     void delete_job_from_simulation_ready_set(std::shared_ptr<Job>);
     void assign_deadline_for_simulated_jobs();

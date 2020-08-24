@@ -50,7 +50,7 @@ Executor::Executor()
  */
 Executor::~Executor()
 {
-    
+
 }
 
 int Executor::get_current_hyper_period_index()
@@ -141,7 +141,6 @@ bool Executor::run_simulation()
             {
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
-                std::cout << who_is_running->get_task_name() << who_is_running->get_job_id() << std::endl;
                 for(auto job : vectors::job_precedence_graph)
                 {
                     job->delete_job_from_predecessors(who_is_running);
@@ -218,7 +217,7 @@ bool Executor::run_simulation()
             {
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
-
+                std::cout << who_is_running->get_task_name() << who_is_running->get_job_id() << std::endl;
                 if(who_is_running->get_simulated_deadline() < who_is_running->get_simulated_finish_time())
                 {
                     return false;
@@ -357,6 +356,17 @@ void Executor::delete_job_from_simulation_ready_queue(std::shared_ptr<Job> job)
         }
     }    
 }
+void Executor::delete_job_from_released_set(std::shared_ptr<Job> job)
+{
+    for(int idx = 0; idx < vectors::released_set.size(); idx++)
+    {
+        if(vectors::released_set.at(idx) == job)
+        {
+            vectors::released_set.erase(vectors::released_set.begin() + idx);
+            break;
+        }
+    }    
+}
 
 void Executor::check_ros2_ready_set()
 {
@@ -393,12 +403,12 @@ void Executor::check_ros2_ready_set()
         {
             if(vectors::released_set.at(job_idx)->get_is_simulated_released() == true)
             {
-                delete_job_from_job_precedence_graph(vectors::released_set.at(job_idx));
+                delete_job_from_released_set(vectors::released_set.at(job_idx));
                 break;
             }
             detect_cnt++;
         }
-        if(detect_cnt == 10)
+        if(detect_cnt == size)
         {
             is_all_deleted = true;
         }

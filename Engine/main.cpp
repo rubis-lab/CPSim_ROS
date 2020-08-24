@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
                 vectors::released_set.push_back(job);
             }
         }
-        while(utils::current_time <= utils::hyper_period && is_simulatable) // we are going to run simulation with two hyper period times. 
+        while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
         {
             // ROS2 EXECUTOR
             executor.check_ros2_ready_set();
