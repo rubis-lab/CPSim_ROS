@@ -414,6 +414,29 @@ void Job::update_simulated_deadline()
         }
     }
 }
+void Job::update_simulated_deadline_ros2()
+{
+    if(m_is_simulated_finished == false || m_is_simulated_released == false)
+    {
+        if(this->get_is_write())
+        {
+            
+            m_simulated_deadline = static_cast<double>(m_real_finish_time);
+            if(m_simulated_deadline == 0)
+            {
+                //std::cout << "WE GOT A ZERO VALUE DEADLINE INSIDE THE UPDATE SIMULATED DEADLINE FUNCTION!" << std::endl;
+            }
+            else
+            {
+                //std::cout << "WE GOT A NON ZERO VALUE INSIDE THE UPDATE SIMULATED DEADLINE FUNCTION!" << std::endl;
+            }
+        }
+        else
+        {
+            m_simulated_deadline = min_simulated_deadline_ros2();
+        }
+    }
+}
 double Job::min_simulated_deadline_det_successor()
 {
     double min_value = INT_MAX;
@@ -435,6 +458,29 @@ double Job::min_simulated_deadline_det_successor()
     {
         if(min_value == INT_MAX)
             return min_value;
+    }
+    std::cout << "FATAL ERROR" << std::endl;
+    std::cin >> min_value;
+}
+double Job::min_simulated_deadline_ros2()
+{
+    double min_value = INT_MAX;
+    if(vectors::transaction_vector.at(this->get_transaction_id()).size() == 0)
+    {
+        return m_real_finish_time;
+    }
+    else
+    {
+        for(auto job : vectors::released_set)
+        {
+            if((job->get_transaction_id() == this->get_transaction_id()) && 
+               (job->get_task_id() == vectors::transaction_vector.at(this->get_transaction_id()).at(vectors::transaction_vector.at(this->get_transaction_id()).size())->get_task_id()) &&
+               (job->get_job_id() == this->get_job_id()))
+            {
+                min_value = job->get_real_finish_time();
+            }
+        }
+        return min_value;
     }
     std::cout << "FATAL ERROR" << std::endl;
     std::cin >> min_value;

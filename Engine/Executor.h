@@ -24,6 +24,8 @@ private:
     std::shared_ptr<Job> who_is_running;
     std::vector<std::shared_ptr<Job>> m_simulation_ready_queue;
     std::vector<std::shared_ptr<Job>> m_ready_set;
+    std::vector<std::shared_ptr<Job>> m_pending_set;
+
 public:
     /**
      * Constructor & Destructor
@@ -53,11 +55,14 @@ public:
     
     void check_job_precedence_graph();
     void check_ros2_ready_set();
+    void update_simulation_pending_set();
+    void delete_job_from_simulation_pending_set(std::shared_ptr<Job>);
     void delete_job_from_job_precedence_graph(std::shared_ptr<Job>);
     void delete_job_from_released_set(std::shared_ptr<Job>);
     void delete_job_from_simulation_ready_queue(std::shared_ptr<Job>);
     void delete_job_from_simulation_ready_set(std::shared_ptr<Job>);
     void assign_deadline_for_simulated_jobs();
+    void assign_deadline_for_simulated_jobs_ros2();
     void assign_predecessors_successors();
     bool simulatability_analysis();
     void clear_simulation_ready_queue();

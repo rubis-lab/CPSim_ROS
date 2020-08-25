@@ -192,23 +192,27 @@ bool Executor::run_simulation()
     {
         if(is_busy == false)
         {
-            //Select highest job in the ready set
-            int min_val = INT_MAX;
-            int min_idx = 0;
-            for(int job_idx = 0; job_idx < m_ready_set.size(); job_idx++)
+            if(m_ready_set.size() != 0)
             {
-                if(m_ready_set.at(job_idx)->get_priority() < min_val)
+                //Select highest job in the ready set
+                is_busy = true;
+                int min_val = INT_MAX;
+                int min_idx = 0;
+                for(int job_idx = 0; job_idx < m_ready_set.size(); job_idx++)
                 {
-                    min_idx = job_idx;
-                    min_val = m_ready_set.at(job_idx)->get_priority(); 
+                    if(m_ready_set.at(job_idx)->get_priority() < min_val)
+                    {
+                        min_idx = job_idx;
+                        min_val = m_ready_set.at(job_idx)->get_priority(); 
+                    }
                 }
+                who_is_running = m_ready_set.at(min_idx);
+                delete_job_from_simulation_ready_set(who_is_running);
+                who_is_running->set_simulated_start_time(utils::current_time);
+                who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
+                who_is_running->set_is_simulated_started(true);
+                who_is_running->set_is_simulated_running(true);
             }
-            who_is_running = m_ready_set.at(min_idx);
-            delete_job_from_simulation_ready_set(who_is_running);
-            who_is_running->set_simulated_start_time(utils::current_time);
-            who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
-            who_is_running->set_is_simulated_started(true);
-            who_is_running->set_is_simulated_running(true);
             return true;
         }
         else // BUSY
@@ -255,7 +259,7 @@ bool Executor::run_simulation()
             }
             else
             {
-                
+                return true;
             }
             
         }
@@ -276,7 +280,19 @@ void Executor::assign_deadline_for_simulated_jobs()
             job->update_simulated_deadline();
     } 
 }
-
+void Executor::assign_deadline_for_simulated_jobs_ros2()
+{
+    for (auto job : vectors::released_set)
+    {
+        if(job->get_is_simulated_finished() == false || job->get_is_simulated_released() == false)
+            job->initialize_simulated_deadline();
+    }
+    for (auto job : vectors::released_set)
+    {
+        if(job->get_is_simulated_finished() == false || job->get_is_simulated_released() == false)
+            job->update_simulated_deadline();
+    } 
+}
 void Executor::check_job_precedence_graph()
 {
     for(auto job : vectors::job_precedence_graph)
@@ -367,35 +383,72 @@ void Executor::delete_job_from_released_set(std::shared_ptr<Job> job)
         }
     }    
 }
+void Executor::delete_job_from_simulation_pending_set(std::shared_ptr<Job> job)
+{
+    for(int idx = 0; idx < m_pending_set.size(); idx++)
+    {
+        if(m_pending_set.at(idx) == job)
+        {
+            m_pending_set.erase(m_pending_set.begin() + idx);
+            break;
+        }
+    }    
+}
+void Executor::update_simulation_pending_set()
+{
+    m_ready_set.insert(m_ready_set.end(), m_pending_set.begin(), m_pending_set.end());
+    m_pending_set.clear();
+}
 
 void Executor::check_ros2_ready_set()
 {
+    // WE GENERATED ALL JOB INSTANCES IN THIS HYPER PERIOD. ( IN RELEASED_SET)
+    // IN ROS2 SCHEDULE, WE NEED TO KEEP THE FUNCTIONAL TEMPORAL CORRECTNESS.
+    // SO, WE NEED TO RELEASE TIMER JOB WHEN THEIR READ CONSTRAINTS SATISFIED.
+    // FOR, SUBSCRIBERS, WE DIDN'T MAKE PREDECESSOR RELATIONS.
+    //
+    // CALLBACKS SCHEDULE MUST BE SAME WITH ITS REAL CYBER SYSTEM.
+    // TIMER CALLBACK MUST BE RELEASED AT ITS REAL RELEASE TIME
+    // SUBSCRIBER CALLBACK BE RELEASED AT ITS PRODUCER JOBS SIMULATED_FINISH_TIME
     for(auto job : vectors::released_set)
     {        
         // READ CONSTRAINED JOB MUST WAIT ITS REAL START TIME
-        if(job->get_is_read() == true)
+        if(job->get_callback_type() == 0)
         {
-            if(job->get_real_start_time() > utils::current_time)
+            if(ABS(job->get_real_release_time() - utils::current_time) < EPSILON)
             {
-                continue;
+                job->set_simulated_release_time(utils::current_time);
+                job->set_is_simulated_released(true);
+                if(m_ready_set.size() == 0)
+                {
+                    if(m_pending_set.size() != 0)
+                        update_simulation_pending_set();
+                }
+                m_ready_set.push_back(job);
             }
-        }
-        
-        // SELECT A JOB WHICH DON'T HAVE ANY PREDECESSOR
-        if(job->get_det_prdecessors().size() == 0)
-        {
-            job->set_simulated_release_time(utils::current_time);
-            job->set_is_simulated_released(true);
-            m_ready_set.push_back(job);      
         }
         else
         {
-            continue;
+            if(job->get_producer_job()->get_is_simulated_finished() == true)
+            {
+                job->set_is_simulated_released(true);
+                job->set_simulated_release_time(job->get_producer_job()->get_simulated_finish_time());
+                if(m_ready_set.size() == 0)
+                {
+                    m_ready_set.push_back(job);
+                    if(m_pending_set.size() != 0)
+                        update_simulation_pending_set();
+                }
+                else
+                {
+                    m_pending_set.push_back(job);
+                }
+            }
         }
     }
 
     bool is_all_deleted = false;
-    while(is_all_deleted == true)
+    while(is_all_deleted == false)
     {
         int size = vectors::released_set.size();
         int detect_cnt = 0;

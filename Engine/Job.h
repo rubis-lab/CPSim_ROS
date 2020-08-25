@@ -143,7 +143,9 @@ public:
     int calculate_absolute_deadline(int, int);
     void initialize_simulated_deadline();
     void update_simulated_deadline();
+    void update_simulated_deadline_ros2();
     double min_simulated_deadline_det_successor();
+    double min_simulated_deadline_ros2();
     void add_history(std::shared_ptr<Job>);
     void add_job_to_successors(std::shared_ptr<Job>);
     void add_job_to_predecessors(std::shared_ptr<Job>);
