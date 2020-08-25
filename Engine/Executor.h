@@ -40,6 +40,7 @@ public:
     int get_current_hyper_period_start();
     int get_current_hyper_period_end();
     int get_simulator_scheduler_mode();
+    bool get_is_busy();
 
     void set_current_hyper_period_index(int); 
     void set_current_hyper_period_start(int);

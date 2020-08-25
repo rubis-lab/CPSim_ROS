@@ -50,6 +50,7 @@ ECU::ECU(int performance, std::string scheduling_policy)
     m_scheduling_policy = scheduling_policy;
     m_num_of_task = 0;
     m_ecu_id = vectors::ecu_vector.size();
+    m_is_busy = false;
 }
 
 ECU::ECU(int performance, std::string scheduling_policy, int ecu_id)
@@ -58,6 +59,7 @@ ECU::ECU(int performance, std::string scheduling_policy, int ecu_id)
     m_scheduling_policy = scheduling_policy;
     m_num_of_task = 0;
     m_ecu_id = ecu_id;
+    m_is_busy = false;
 }
 
 /**

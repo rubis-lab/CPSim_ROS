@@ -69,7 +69,7 @@ void ScheduleGenerator::set_is_globally_busy(bool is_g_busy)
  * @warning none
  * @todo none
  */
-void ScheduleGenerator::generate_schedule_offline()
+bool ScheduleGenerator::generate_schedule_offline()
 {
     unsigned long long offline_current_time = 0;
     generate_job_instances_for_hyper_period();
@@ -182,6 +182,10 @@ void ScheduleGenerator::generate_schedule_offline()
                     
                     ecu->delete_job_from_ready_set(ecu->get_who_is_running());
                     ecu->add_job_to_finished_jobset(ecu->get_who_is_running());
+                    if(ecu->get_who_is_running()->get_real_finish_time() > vectors::transaction_vector.at(ecu->get_who_is_running()->get_transaction_id()).at(0)->get_period() * (ecu->get_who_is_running()->get_job_id()))
+                    {
+                        return false;
+                    }
                     ecu->set_who_is_running(nullptr);
                     // IF READY SET IS EMPTY AFTER THE JOB FINISHED, THEN FINISH THE BUSY PERIOD
                     if(ecu->get_ecu_ready_set().size() == 0)
@@ -237,7 +241,7 @@ void ScheduleGenerator::generate_schedule_offline()
         }
         offline_current_time ++;
     }
-    
+    return true;
 }
 /**
  * @fn void ScheduleGenerator::generate_schedule_online()

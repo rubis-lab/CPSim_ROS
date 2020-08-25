@@ -76,15 +76,26 @@ void Initializer::initialize()
          * ECU Vector Initialization
          * number of ECU is [3-10]
          */
-        //random_ecu_generator((rand() % 8) + 3);
-        random_ecu_generator(2);
+        random_ecu_generator((rand() % 8) + 3);
+        //random_ecu_generator(2);
         /**
          * Task Vector Initialization
          */
-        if(!random_transaction_generator(2, 3))
+        
+        int ecu_num = vectors::ecu_vector.size();
+        int random_task_num = ecu_num * ((rand() % 5) + 1);
+        int random_transaction_num = std::ceil(0.1 * random_task_num);
+        if(random_transaction_num == 0)
+        {
+            random_transaction_num = 1;
+        }
+        // std::cout << "ECU :" << ecu_num  << std::endl;
+        // std::cout << "TASK : " << random_task_num << std::endl;
+        // std::cout << "TRANSACTION : " << random_transaction_num << std::endl;
+        if(!random_transaction_generator(random_transaction_num, random_task_num))
             std::cout << "TASK NUMBER IS TOO MUCH" << std::endl;
         /**
-         * Each task can be [0-2] data producer of random selected job.
+         * 
          */
         random_constraint_selector(0.3, 0.3);
         transaction_producer_consumer_generator();
@@ -204,18 +215,18 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         int offset = 0;
         int priority = i;
         int callback_type = 0;
-        int fet = (double)period * 0.1;
+        int fet = (double)period * 0.2;
         bool is_read = false;
         bool is_write = false;
         int ecu_id = uniform_ecu_selector();
         int transaction_id = i;
         std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id, transaction_id);
-        task->set_chain_pos(vectors::transaction_vector.at(i).size());
+        task->set_chain_pos(vectors::transaction_vector.at(transaction_id).size());
         
         vectors::ecu_vector.at(ecu_id)->add_task_to_ecu(task);
         vectors::task_vector.push_back(task);
         vectors::timer_vector.push_back(task);
-        vectors::transaction_vector.at(i).push_back(task);
+        vectors::transaction_vector.at(transaction_id).push_back(task);
     }
     
 
@@ -230,26 +241,30 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         int offset = -1;
         int priority = 1000 + i;
         int callback_type = 1;
-        int fet = 1;
         bool is_read = false;
         bool is_write = false;
         int ecu_id = uniform_ecu_selector();
-        int transaction_id = i;
+        int transaction_id = random_transaction_selector(transaction_num);
+        int fet = vectors::transaction_vector.at(transaction_id).at(0)->get_fet();
         std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id, transaction_id);
-        task->set_chain_pos(vectors::transaction_vector.at(i).size());
+        task->set_chain_pos(vectors::transaction_vector.at(transaction_id).size());
         
         vectors::ecu_vector.at(ecu_id)->add_task_to_ecu(task);
         vectors::task_vector.push_back(task);
         vectors::subscriber_vector.push_back(task);
-        vectors::transaction_vector.at(i).push_back(task); //TBD
+        vectors::transaction_vector.at(transaction_id).push_back(task); //TBD
     }
-
     return true;
 }
 
+int Initializer::random_transaction_selector(int transaction_num)
+{
+    int selector = rand() % transaction_num;
+    return selector; 
+}
 int Initializer::uniform_ecu_selector()
 {   
-    int ecu_id = 0;
+    int ecu_id = rand() % vectors::ecu_vector.size();
     for(int i = 0; i < vectors::ecu_vector.size(); i++)
     {
         if(vectors::ecu_vector.at(ecu_id)->get_num_of_task() > vectors::ecu_vector.at(i)->get_num_of_task())

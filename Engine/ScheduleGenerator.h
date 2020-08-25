@@ -46,7 +46,7 @@ public:
      * Schedule Generator for real cyber system
      * Generate Real Cyber System Schedule Globally with a Hyper Period unit.
      */
-    void generate_schedule_offline();
+    bool generate_schedule_offline();
     void generate_schedule_online();
     void generate_job_instances_for_hyper_period();
     void generate_a_job();

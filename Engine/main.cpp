@@ -59,16 +59,18 @@ int main(int argc, char *argv[])
     /**
      * SYNTHETIC WORKLOAD SIMULATION OPTIONS
      */
-    int epochs = 1;
+    int epochs = 1000;
     int edf_simulatable_count = 0;
     int ros2_simulatable_count = 0;
     int edf_non_simulatable_count = 0;
     int ros2_non_simulatable_count = 0;
 
-    for(int i = 0; i < epochs; i++) // Initializer, ScheduleSimulator, OfflineGuider and Executer will be reset due to going out of scope at each loop.
+    int iter = 0;
+    while(iter < epochs)
     {
         /** [Initialization with Specification]
          */
+        //std::cout << "EPOCH : " << i << std::endl;
         Initializer initializer_module;
         ScheduleGenerator schedule_generator;
         OfflineGuider offline_guider;
@@ -76,12 +78,37 @@ int main(int argc, char *argv[])
         
         initializer_module.initialize();
         bool is_simulatable = true;
-        schedule_generator.generate_schedule_offline();
+        bool is_schedulable = schedule_generator.generate_schedule_offline();
+        if(is_schedulable == true)
+        {
+            std::cout << iter << std::endl;
+            iter++;
+        }
+        else
+        {
+            for(auto ecu : vectors::ecu_vector)
+            {
+                ecu->clear_every_jobset();
+            }
+            vectors::ecu_vector.clear();
+            vectors::job_precedence_graph.clear();
+            vectors::released_set.clear();
+            vectors::subscriber_vector.clear();
+            vectors::timer_vector.clear();
+            vectors::task_vector.clear();
+            for(auto transaction : vectors::transaction_vector)
+            {
+                transaction.clear();
+            }
+            vectors::transaction_vector.clear();
+            utils::current_time = 0;
+            continue;
+        }
+        
         offline_guider.construct_job_precedence_graph();
 
         executor.set_simulator_scheduler_mode(0); // EDF Scheduling Mode
         executor.assign_deadline_for_simulated_jobs();
-    
         while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
         {
             // EDF
@@ -135,7 +162,33 @@ int main(int argc, char *argv[])
         {
             ros2_non_simulatable_count++;
         }
+        for(auto ecu : vectors::ecu_vector)
+        {
+            ecu->clear_every_jobset();
+        }
+        vectors::ecu_vector.clear();
+        vectors::job_precedence_graph.clear();
+        vectors::released_set.clear();
+        vectors::subscriber_vector.clear();
+        vectors::timer_vector.clear();
+        vectors::task_vector.clear();
+        for(auto transaction : vectors::transaction_vector)
+        {
+            transaction.clear();
+        }
+        vectors::transaction_vector.clear();
+        utils::current_time = 0;
     }
+        std::cout << std::endl;
+        std::cout << "--------------------" << std::endl;
+        std::cout << edf_simulatable_count << " edf simulations were simulatable." << std::endl;
+        std::cout << edf_non_simulatable_count << " edf simulations were non-simulatable." << std::endl;
+        std::cout << ros2_simulatable_count << " simulations were simulatable." << std::endl;
+        std::cout << ros2_non_simulatable_count << " simulations were non-simulatable." << std::endl;
+        
+        std::cout << "Simulatability ratio is " << edf_simulatable_count / (double)(edf_simulatable_count + edf_non_simulatable_count) << std::endl;
+        std::cout << "Simulatability ratio is " << ros2_simulatable_count / (double)(ros2_simulatable_count + ros2_non_simulatable_count) << std::endl;
+        std::cout << "--------------------" << std::endl;
     return 0;
 }
 

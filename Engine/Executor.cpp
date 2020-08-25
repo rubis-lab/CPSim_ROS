@@ -32,7 +32,7 @@
  */
 Executor::Executor()
 {
-
+    is_busy = false;
 }
 
 /**
@@ -71,7 +71,10 @@ int Executor::get_simulator_scheduler_mode()
 {
     return m_simulator_scheduler_mode;
 }
-
+bool Executor::get_is_busy()
+{
+    return is_busy;
+}
 void Executor::set_current_hyper_period_index(int current_hyper_period_index)
 {
     m_current_hyper_period_index = current_hyper_period_index;
@@ -179,13 +182,11 @@ bool Executor::run_simulation()
                         return true;
                     }
                 }
-                
             }
             else
             {
                 return true;
             }
-            
         }
     }
     else // ROS2
@@ -221,7 +222,6 @@ bool Executor::run_simulation()
             {
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
-                std::cout << who_is_running->get_task_name() << who_is_running->get_job_id() << std::endl;
                 if(who_is_running->get_simulated_deadline() < who_is_running->get_simulated_finish_time())
                 {
                     return false;

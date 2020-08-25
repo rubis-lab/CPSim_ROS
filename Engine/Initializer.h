@@ -37,6 +37,7 @@ public:
     bool random_transaction_generator(int, int); //this function is for experiments.
     void random_ecu_generator(int); // this function is for experiments.
     void transaction_producer_consumer_generator();
+    int random_transaction_selector(int);
     void random_constraint_selector(double, double);
     int uniform_ecu_selector();
     int uniform_period_selector(int);
