@@ -77,18 +77,16 @@ void Initializer::initialize()
          * number of ECU is [3-10]
          */
         random_ecu_generator((rand() % 8) + 3);
-        //random_ecu_generator(2);
+        //random_ecu_generator(10);
         /**
          * Task Vector Initialization
          */
         
         int ecu_num = vectors::ecu_vector.size();
         int random_task_num = ecu_num * ((rand() % 5) + 1);
-        int random_transaction_num = std::ceil(0.1 * random_task_num);
+        int random_transaction_num = std::ceil(utils::transaction_factor * random_task_num);
         if(random_transaction_num == 0)
-        {
             random_transaction_num = 1;
-        }
         // std::cout << "ECU :" << ecu_num  << std::endl;
         // std::cout << "TASK : " << random_task_num << std::endl;
         // std::cout << "TRANSACTION : " << random_transaction_num << std::endl;
@@ -97,7 +95,7 @@ void Initializer::initialize()
         /**
          * 
          */
-        random_constraint_selector(0.3, 0.3);
+        random_constraint_selector(utils::read_factor, utils::write_factor);
         transaction_producer_consumer_generator();
     }
                           
@@ -213,7 +211,7 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         std::string task_name = "T" + std::to_string(i);
         int period = uniform_period_selector(transaction_num);
         int offset = 0;
-        int priority = i;
+        int priority = rand() % m_timer_num;
         int callback_type = 0;
         int fet = (double)period * 0.2;
         bool is_read = false;
@@ -239,7 +237,7 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         std::string task_name = "S" + std::to_string(i);
         int period = -1;
         int offset = -1;
-        int priority = 1000 + i;
+        int priority = 1000 + (rand() % m_subscriber_num);
         int callback_type = 1;
         bool is_read = false;
         bool is_write = false;

@@ -23,6 +23,9 @@ private:
     int m_num_of_task;
     int m_l_busy_period_start_time;
     int m_l_busy_period_finish_time;
+    int m_num_of_jobs;
+    int m_num_of_finished_jobs;
+    int m_num_of_left_jobs;
     bool m_is_busy;
     std::shared_ptr<Job> who_is_running;
     std::shared_ptr<Job> who_is_next;
@@ -50,6 +53,9 @@ public:
     int get_num_of_task();
     int get_l_busy_period_start_time();
     int get_l_busy_period_finish_time();
+    int get_num_of_jobs();
+    int get_num_of_finished_jobs();
+    int get_num_of_left_jobs();
     bool get_is_busy();
     std::string get_scheduling_policy();
     std::shared_ptr<Job> get_who_is_running();
@@ -69,6 +75,9 @@ public:
     void set_l_busy_period_start_time(int);
     void set_l_busy_period_finish_time(int);
     void set_is_busy(bool);
+    void set_num_of_jobs(int);
+    void set_num_of_finished_jobs(int);
+    void set_num_of_left_jobs(int);
     void set_scheduling_policy(std::string);
     void set_who_is_running(std::shared_ptr<Job>);
     void set_who_is_next(std::shared_ptr<Job>);

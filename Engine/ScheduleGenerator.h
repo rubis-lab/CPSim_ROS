@@ -15,6 +15,7 @@
 class ScheduleGenerator {
 private:
     int m_hyper_period;
+    int m_offline_current_time;
     int m_g_busy_period_start_time;
     int m_g_busy_period_finish_time;
     std::vector<std::shared_ptr<Job>> m_execution_order_b;

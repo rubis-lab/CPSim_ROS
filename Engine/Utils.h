@@ -32,7 +32,9 @@ namespace utils
     inline double current_time = 0; //simulation time(us)
     inline int number_of_ECUs = 0;
     inline int number_of_tasks = 0;
-     
+    inline double transaction_factor = 0.0;
+    inline double read_factor = 0.0;
+    inline double write_factor = 0.0;
     inline double simple_mapping_function = 0.3;
 
     inline bool real_workload = false; 

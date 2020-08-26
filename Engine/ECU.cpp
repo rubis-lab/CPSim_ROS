@@ -130,6 +130,18 @@ int ECU::get_l_busy_period_finish_time()
 {
     return m_l_busy_period_finish_time;
 }
+int ECU::get_num_of_jobs()
+{
+    return m_ready_set.size();
+}
+int ECU::get_num_of_finished_jobs()
+{
+    return m_finished_jobset.size();
+}
+int ECU::get_num_of_left_jobs()
+{
+    return m_released_jobset.size();
+}
 bool ECU::get_is_busy()
 {
     return m_is_busy;
@@ -195,6 +207,18 @@ void ECU::set_l_busy_period_start_time(int l_busy_period_start_time)
 void ECU::set_l_busy_period_finish_time(int l_busy_period_finish_time)
 {
     m_l_busy_period_finish_time = l_busy_period_finish_time;
+}
+void ECU::set_num_of_jobs(int num_of_jobs)
+{
+    m_num_of_jobs = num_of_jobs;
+}
+void ECU::set_num_of_finished_jobs(int num_of_finished_jobs)
+{
+    m_num_of_finished_jobs = num_of_finished_jobs;
+}
+void ECU::set_num_of_left_jobs(int num_of_left_jobs)
+{
+    m_num_of_left_jobs = num_of_left_jobs;
 }
 void ECU::set_is_busy(bool is_busy)
 {
