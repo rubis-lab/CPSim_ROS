@@ -108,7 +108,7 @@ void Initializer::initialize()
      * Global Logger Initialization
      */    
     global_object::logger = std::make_shared<Logger>();
-    global_object::logger->log_task_vector_status();
+    global_object::logger->log_transaction_status();
 
 }
 
@@ -208,7 +208,7 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
     m_timer_num = transaction_num;
     for(int i = 0; i < m_timer_num; i++)
     {
-        std::string task_name = "T" + std::to_string(i);
+        std::string task_name = "T" + std::to_string(i) + ",0";
         int period = uniform_period_selector(transaction_num);
         int offset = 0;
         int priority = rand() % m_timer_num;
@@ -234,7 +234,6 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
     m_subscriber_num = task_num - m_timer_num;
     for(int i = 0; i < m_subscriber_num; i++)
     {
-        std::string task_name = "S" + std::to_string(i);
         int period = -1;
         int offset = -1;
         int priority = 1000 + (rand() % m_subscriber_num);
@@ -243,6 +242,7 @@ bool Initializer::random_transaction_generator(int transaction_num, int task_num
         bool is_write = false;
         int ecu_id = uniform_ecu_selector();
         int transaction_id = random_transaction_selector(transaction_num);
+        std::string task_name = "T" + std::to_string(transaction_id) + "," + std::to_string(vectors::transaction_vector.at(transaction_id).size());
         int fet = vectors::transaction_vector.at(transaction_id).at(0)->get_fet();
         std::shared_ptr<Task> task = std::make_shared<Task>(task_name, period, period, priority, callback_type, fet, offset, is_read, is_write, ecu_id, transaction_id);
         task->set_chain_pos(vectors::transaction_vector.at(transaction_id).size());

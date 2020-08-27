@@ -32,11 +32,12 @@ public:
     void set_execution_order_buffer(std::vector<std::shared_ptr<Job>>);
     void add_current_simulated_job(std::shared_ptr<Job>);
 
-    void log_task_vector_status();
+    void log_system_status();
+    void log_transaction_status();
     void log_job_vector_of_each_ECU_status();
     void log_job_vector_of_simulator_status();
     void log_which_job_was_deadline_miss(std::shared_ptr<Job>);
-    void print_job_execution_on_ECU(std::vector<std::shared_ptr<Job>>, std::vector<std::shared_ptr<Job>>, int);
+    void print_job_execution_on_ECU();
     void print_job_execution_schedule();
     void print_offline_guider_status();
 };

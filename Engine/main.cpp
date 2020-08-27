@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         /**
          * SYNTHETIC WORKLOAD SIMULATION OPTIONS
          */
-        int epochs = 1000;
+        int epochs = 1;
         int edf_simulatable_count = 0;
         int ros2_simulatable_count = 0;
         int edf_non_simulatable_count = 0;
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
                 utils::current_time = 0;
                 continue;
             }
-            
+            global_object::logger->print_job_execution_on_ECU();
             offline_guider.construct_job_precedence_graph();
 
             executor.set_simulator_scheduler_mode(0); // EDF Scheduling Mode
