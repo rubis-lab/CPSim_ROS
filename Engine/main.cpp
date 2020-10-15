@@ -166,6 +166,34 @@ int main(int argc, char *argv[])
             {
                 ros2_non_simulatable_count++;
             }
+            schedule_generator.generate_schedule_offline();
+            executor.set_simulator_scheduler_mode(2); // True time Scheduling Mode
+            for(auto ecu : vectors::ecu_vector)
+            {
+                for(auto job : ecu->get_finished_jobset())
+                {
+                    vectors::released_set.push_back(job);
+                }
+            }
+            executor.assign_deadline_for_simulated_jobs_ros2();
+            while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
+            {
+                // True Time EXECUTOR
+                executor.check_ros2_ready_set();
+                is_simulatable = executor.run_simulation();          
+                executor.check_ros2_ready_set();            // run a job on the simulator
+                schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
+                offline_guider.update_job_precedence_graph();   // update job_precedence_graph
+                utils::current_time = utils::current_time + 0.1;
+            }
+            if(is_simulatable == true)
+            {
+                ros2_simulatable_count ++;
+            }
+            else
+            {
+                ros2_non_simulatable_count++;
+            }
             for(auto ecu : vectors::ecu_vector)
             {
                 ecu->clear_every_jobset();

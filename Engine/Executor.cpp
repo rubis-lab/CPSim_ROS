@@ -189,7 +189,83 @@ bool Executor::run_simulation()
             }
         }
     }
-    else // ROS2
+    else if(m_simulator_scheduler_mode == 1) // ROS2
+    {
+        if(is_busy == false)
+        {
+            if(m_ready_set.size() != 0)
+            {
+                //Select highest job in the ready set
+                is_busy = true;
+                int min_val = INT_MAX;
+                int min_idx = 0;
+                for(int job_idx = 0; job_idx < m_ready_set.size(); job_idx++)
+                {
+                    if(m_ready_set.at(job_idx)->get_priority() < min_val)
+                    {
+                        min_idx = job_idx;
+                        min_val = m_ready_set.at(job_idx)->get_priority(); 
+                    }
+                }
+                who_is_running = m_ready_set.at(min_idx);
+                delete_job_from_simulation_ready_set(who_is_running);
+                who_is_running->set_simulated_start_time(utils::current_time);
+                who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
+                who_is_running->set_is_simulated_started(true);
+                who_is_running->set_is_simulated_running(true);
+            }
+            return true;
+        }
+        else // BUSY
+        {
+            if(ABS(who_is_running->get_simulated_finish_time() - utils::current_time) < EPSILON)
+            {
+                who_is_running->set_is_simulated_running(false);
+                who_is_running->set_is_simulated_finished(true);
+                if(who_is_running->get_simulated_deadline() < who_is_running->get_simulated_finish_time())
+                {
+                    return false;
+                }
+                else
+                {
+                    if(m_ready_set.size() != 0)
+                    {
+                        int min_val = INT_MAX;
+                        int min_idx = 0;
+                        for(int job_idx = 0; job_idx < m_ready_set.size(); job_idx++)
+                        {
+                            if(m_ready_set.at(job_idx)->get_priority() < min_val)
+                            {
+                                min_idx = job_idx;
+                                min_val = m_ready_set.at(job_idx)->get_priority(); 
+                            }
+                        }
+
+                        who_is_running = m_ready_set.at(min_idx);
+                        delete_job_from_simulation_ready_set(who_is_running);
+                        who_is_running->set_is_simulated_running(true);
+                        who_is_running->set_is_simulated_started(true);
+                        who_is_running->set_simulated_start_time(utils::current_time);
+                        who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
+                        return true;
+                    }   
+                    else
+                    {
+                        who_is_running = nullptr;
+                        is_busy = false;
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                return true;
+            }
+            
+        }
+        
+    }
+    else if(m_simulator_scheduler_mode == 2) // True Time
     {
         if(is_busy == false)
         {
