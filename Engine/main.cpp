@@ -22,8 +22,6 @@
 */
 #include <memory>
 #include <stdio.h>
-#include <unistd.h>
-#include <dlfcn.h>
 #include <random>
 #include <stdlib.h>
 
@@ -65,7 +63,7 @@ int main(int argc, char *argv[])
         /**
          * SYNTHETIC WORKLOAD SIMULATION OPTIONS
          */
-        int epochs = 1000;
+        int epochs = 1;
         int edf_simulatable_count = 0;
         int ros2_simulatable_count = 0;
         int edf_non_simulatable_count = 0;
@@ -110,7 +108,7 @@ int main(int argc, char *argv[])
                 utils::current_time = 0;
                 continue;
             }
-            
+            global_object::logger->print_job_execution_on_ECU();
             offline_guider.construct_job_precedence_graph();
 
             executor.set_simulator_scheduler_mode(0); // EDF Scheduling Mode
@@ -199,47 +197,3 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
-
- 
-        
-    //      int simulation_termination_time = utils::hyper_period * 10000000000;
-    //      bool is_simulatable = true;
-
-    //      while(utils::current_time < simulation_termination_time && is_simulatable)
-    //      {
-    //         schedule_generator.simulate_scheduling_on_real(utils::current_time);
-    //         offline_guider.construct_job_precedence_graph();
-    //         is_simulatable = executor.run_simulation(utils::current_time);
-    //         vectors::job_vector_of_simulator.clear();
-    //         for(auto someVector : vectors::job_vectors_for_each_ECU)
-    //             someVector.clear();
-    //         vectors::job_vectors_for_each_ECU.clear();
-    //      }
-    //      is_simulatable ? ++simulatable_count : ++nonsimulatable_count;
-        
-    //     if(utils::real_workload == false)
-    //     {
-    //         // Reset Globals
-    //         global_object::logger = nullptr;
-    //         global_object::gld_vector.clear();
-            
-    //         vectors::job_vector_of_simulator.clear();
-    //         vectors::ecu_vector.clear();
-    //         vectors::task_vector.clear();
-
-    //         for(auto someVector : vectors::job_vectors_for_each_ECU)
-    //             someVector.clear();
-    //         vectors::job_vectors_for_each_ECU.clear();
-    //         utils::current_time = 0;
-    //     }
-    // }
-
-    // if(utils::real_workload == false)
-    // {
-    //     std::cout << std::endl;
-    //     std::cout << "--------------------" << std::endl;
-    //     std::cout << simulatable_count << " simulations were simulatable." << std::endl;
-    //     std::cout << nonsimulatable_count << " simulations were non-simulatable." << std::endl;
-    //     std::cout << "Simulatability ratio is " << simulatable_count / (double)(simulatable_count + nonsimulatable_count) << std::endl;
-    //     std::cout << "--------------------" << std::endl;
-    // }        
