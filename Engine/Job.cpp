@@ -391,7 +391,7 @@ void Job::initialize_simulated_deadline()
         m_simulated_deadline = INT_MAX;
     }
 }
-void Job::update_simulated_deadline()
+void Job::update_simulated_deadline(int mode)
 {
     if(m_is_simulated_finished == false || m_is_simulated_released == false)
     {
@@ -410,7 +410,7 @@ void Job::update_simulated_deadline()
         }
         else
         {
-            m_simulated_deadline = min_simulated_deadline_det_successor();
+            m_simulated_deadline = min_simulated_deadline_det_successor(mode);
         }
     }
 }
@@ -437,30 +437,37 @@ void Job::update_simulated_deadline_ros2()
         }
     }
 }
-double Job::min_simulated_deadline_det_successor()
+double Job::min_simulated_deadline_det_successor(int mode)
 {
-    double min_value = INT_MAX;
-    if(!m_det_successors.empty())
+    if(mode == 0) // OURS mode
     {
-        std::shared_ptr<Job> min_succ = m_det_successors.front();
-        for(auto succ : m_det_successors)
+        double min_value = INT_MAX;
+        if(!m_det_successors.empty())
         {
-            if(succ->get_simulated_deadline() < min_value)
+            std::shared_ptr<Job> min_succ = m_det_successors.front();
+            for(auto succ : m_det_successors)
             {
-                min_value = succ->get_simulated_deadline();
-                min_succ = succ;
+                if(succ->get_simulated_deadline() < min_value)
+                {
+                    min_value = succ->get_simulated_deadline();
+                    min_succ = succ;
+                }
             }
-        }
-        add_history(min_succ);
-        return min_value;
-    }
-    else
-    {
-        if(min_value == INT_MAX)
+            add_history(min_succ);
             return min_value;
+        }
+        else
+        {
+            if(min_value == INT_MAX)
+                return min_value;
+        }
+        std::cout << "FATAL ERROR" << std::endl;
+        std::cin >> min_value;
     }
-    std::cout << "FATAL ERROR" << std::endl;
-    std::cin >> min_value;
+    else // TRUE TIME MODE
+    {
+        
+    }
 }
 double Job::min_simulated_deadline_ros2()
 {

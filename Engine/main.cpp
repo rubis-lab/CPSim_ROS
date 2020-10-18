@@ -64,10 +64,12 @@ int main(int argc, char *argv[])
          * SYNTHETIC WORKLOAD SIMULATION OPTIONS
          */
         int epochs = 1;
-        int edf_simulatable_count = 0;
-        int ros2_simulatable_count = 0;
-        int edf_non_simulatable_count = 0;
-        int ros2_non_simulatable_count = 0;
+        int ours_simulatable_count = 0;
+        int all_sync_simulatable_count = 0;
+        int true_time_simulatable_count = 0;
+        int ours_non_simulatable_count = 0;
+        int all_sync_non_simulatable_count = 0;
+        int true_time_non_simulatable_count = 0;
 
         int iter = 0;
         while(iter < epochs)
@@ -87,6 +89,7 @@ int main(int argc, char *argv[])
             {
                 //std::cout << iter << std::endl;
                 iter++;
+
             }
             else
             {
@@ -124,11 +127,11 @@ int main(int argc, char *argv[])
             }
             if(is_simulatable == true)
             {
-                edf_simulatable_count ++;
+                ours_simulatable_count ++;
             }
             else
             {
-                edf_non_simulatable_count++;
+                ours_non_simulatable_count++;
             }
             
             is_simulatable = true;
@@ -160,11 +163,11 @@ int main(int argc, char *argv[])
             }
             if(is_simulatable == true)
             {
-                ros2_simulatable_count ++;
+                all_sync_simulatable_count ++;
             }
             else
             {
-                ros2_non_simulatable_count++;
+                all_sync_non_simulatable_count++;
             }
             schedule_generator.generate_schedule_offline();
             executor.set_simulator_scheduler_mode(2); // True time Scheduling Mode
@@ -188,11 +191,11 @@ int main(int argc, char *argv[])
             }
             if(is_simulatable == true)
             {
-                ros2_simulatable_count ++;
+                true_time_simulatable_count ++;
             }
             else
             {
-                ros2_non_simulatable_count++;
+                true_time_non_simulatable_count++;
             }
             for(auto ecu : vectors::ecu_vector)
             {
@@ -211,16 +214,21 @@ int main(int argc, char *argv[])
             vectors::transaction_vector.clear();
             utils::current_time = 0;
         }
-            std::cout << std::endl;
-            std::cout << "--------------------" << std::endl;
-            std::cout << edf_simulatable_count << " edf simulations were simulatable." << std::endl;
-            std::cout << edf_non_simulatable_count << " edf simulations were non-simulatable." << std::endl;
-            std::cout << ros2_simulatable_count << " simulations were simulatable." << std::endl;
-            std::cout << ros2_non_simulatable_count << " simulations were non-simulatable." << std::endl;
-            
-            std::cout << "Simulatability ratio is " << edf_simulatable_count / (double)(edf_simulatable_count + edf_non_simulatable_count) << std::endl;
-            std::cout << "Simulatability ratio is " << ros2_simulatable_count / (double)(ros2_simulatable_count + ros2_non_simulatable_count) << std::endl;
-            std::cout << "--------------------" << std::endl;
+
+        // PRINT THE INFORMATIONS
+        std::cout << std::endl;
+        std::cout << "--------------------" << std::endl;
+        std::cout << ours_simulatable_count << " OURS simulations were simulatable." << std::endl;
+        std::cout << ours_non_simulatable_count << " OURS simulations were non-simulatable." << std::endl;
+        std::cout << all_sync_simulatable_count << " ALL-SYNC simulations were simulatable." << std::endl;
+        std::cout << all_sync_non_simulatable_count << " ALL-SYNC simulations were non-simulatable." << std::endl;
+        std::cout << true_time_simulatable_count << " TRUE TIME simulations were simulatable." << std::endl;
+        std::cout << true_time_non_simulatable_count << " TRUE TIME simulations were non-simulatable." << std::endl;
+        
+        std::cout << "Simulatability ratio is " << ours_simulatable_count / (double)(ours_simulatable_count + ours_non_simulatable_count) << std::endl;
+        std::cout << "Simulatability ratio is " << all_sync_simulatable_count / (double)(all_sync_simulatable_count + all_sync_non_simulatable_count) << std::endl;
+        std::cout << "Simulatability ratio is " << true_time_simulatable_count / (double)(true_time_simulatable_count + true_time_non_simulatable_count) << std::endl;
+        std::cout << "--------------------" << std::endl;
         utils::write_factor = utils::write_factor + 0.1;
     }
     return 0;

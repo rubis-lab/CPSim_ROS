@@ -19,7 +19,7 @@ private:
     int m_current_hyper_period_index;
     int m_current_hyper_period_start;
     int m_current_hyper_period_end;
-    int m_simulator_scheduler_mode; // 0 : EDF, 1 : ROS2
+    int m_simulator_scheduler_mode; // 0 : OURS, 1 : ALL-SYNC , 2 : TRUE TIME
     bool is_busy;
     std::shared_ptr<Job> who_is_running;
     std::vector<std::shared_ptr<Job>> m_simulation_ready_queue;

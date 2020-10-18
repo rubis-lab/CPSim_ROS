@@ -353,7 +353,7 @@ void Executor::assign_deadline_for_simulated_jobs()
     for (auto job : vectors::job_precedence_graph)
     {
         if(job->get_is_simulated_finished() == false || job->get_is_simulated_released() == false)
-            job->update_simulated_deadline();
+            job->update_simulated_deadline(m_simulator_scheduler_mode);
     } 
 }
 void Executor::assign_deadline_for_simulated_jobs_ros2()
@@ -366,7 +366,7 @@ void Executor::assign_deadline_for_simulated_jobs_ros2()
     for (auto job : vectors::released_set)
     {
         if(job->get_is_simulated_finished() == false || job->get_is_simulated_released() == false)
-            job->update_simulated_deadline();
+            job->update_simulated_deadline(m_simulator_scheduler_mode);
     } 
 }
 void Executor::check_job_precedence_graph()
