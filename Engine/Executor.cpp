@@ -275,19 +275,9 @@ bool Executor::run_simulation()
             if(m_simulation_ready_queue.size() != 0)
             {
                 is_busy = true;
-                //-------------------------FIND EARLIEST DEADLINE JOB START -------------------------------------------------------------------------------------
-                int min_deadline = INT_MAX;
-                int min_idx = 0;
-                for(int job_idx = 0; job_idx < m_simulation_ready_queue.size(); job_idx++)
-                {
-                    if(m_simulation_ready_queue.at(job_idx)->get_simulated_deadline() < min_deadline)
-                    {
-                        min_idx = job_idx;
-                        min_deadline = m_simulation_ready_queue.at(job_idx)->get_simulated_deadline();
-                    }
-                }
-                //-------------------------FIND EARLIEST DEADLINE JOB END -------------------------------------------------------------------------------------
-                who_is_running = m_simulation_ready_queue.at(min_idx);
+               // WE JUST RUN THE JOB WHICH IS AT THE FRONT OF THE READY_QUEUE.
+               // THIS IS BECAUSE OF THE PUSHED TIMING. WE ALREADY CONSIDERED JOB EXECUTION ORDER WHEN PUSHING THE JOB.
+                who_is_running = m_simulation_ready_queue.front();
                 delete_job_from_simulation_ready_queue(who_is_running);
                 who_is_running->set_is_simulated_running(true);
                 who_is_running->set_is_simulated_started(true);
@@ -315,17 +305,8 @@ bool Executor::run_simulation()
                     if(m_simulation_ready_queue.size() != 0)
                     {
                         int min_deadline = INT_MAX;
-                        int min_idx = 0;
-                        for(int job_idx = 0; job_idx < m_simulation_ready_queue.size(); job_idx++)
-                        {
-                            if(m_simulation_ready_queue.at(job_idx)->get_simulated_deadline() < min_deadline)
-                            {
-                                min_idx = job_idx;
-                                min_deadline = m_simulation_ready_queue.at(job_idx)->get_simulated_deadline();
-                            }
-                        }
-
-                        who_is_running = m_simulation_ready_queue.at(min_idx);
+                       
+                        who_is_running = m_simulation_ready_queue.front();
                         delete_job_from_simulation_ready_queue(who_is_running);
                         who_is_running->set_is_simulated_running(true);
                         who_is_running->set_is_simulated_started(true);
