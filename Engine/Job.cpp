@@ -391,7 +391,7 @@ void Job::initialize_simulated_deadline()
         m_simulated_deadline = INT_MAX;
     }
 }
-void Job::update_simulated_deadline(int mode)
+void Job::update_simulated_deadline()
 {
     if(m_is_simulated_finished == false || m_is_simulated_released == false)
     {
@@ -408,9 +408,9 @@ void Job::update_simulated_deadline(int mode)
                 //std::cout << "WE GOT A NON ZERO VALUE INSIDE THE UPDATE SIMULATED DEADLINE FUNCTION!" << std::endl;
             }
         }
-        else
+        else 
         {
-            m_simulated_deadline = min_simulated_deadline_det_successor(mode);
+            m_simulated_deadline = min_simulated_deadline_det_successor();
         }
     }
 }
@@ -437,37 +437,31 @@ void Job::update_simulated_deadline_ros2()
         }
     }
 }
-double Job::min_simulated_deadline_det_successor(int mode)
+double Job::min_simulated_deadline_det_successor()
 {
-    if(mode == 0) // OURS mode
+    double min_value = INT_MAX;
+    if(!m_det_successors.empty())
     {
-        double min_value = INT_MAX;
-        if(!m_det_successors.empty())
+        std::shared_ptr<Job> min_succ = m_det_successors.front();
+        for(auto succ : m_det_successors)
         {
-            std::shared_ptr<Job> min_succ = m_det_successors.front();
-            for(auto succ : m_det_successors)
+            if(succ->get_simulated_deadline() < min_value)
             {
-                if(succ->get_simulated_deadline() < min_value)
-                {
-                    min_value = succ->get_simulated_deadline();
-                    min_succ = succ;
-                }
+                min_value = succ->get_simulated_deadline();
+                min_succ = succ;
             }
-            add_history(min_succ);
-            return min_value;
         }
-        else
-        {
-            if(min_value == INT_MAX)
-                return min_value;
-        }
-        std::cout << "FATAL ERROR" << std::endl;
-        std::cin >> min_value;
+        add_history(min_succ);
+        return min_value;
     }
-    else // TRUE TIME MODE
+    else
     {
-        
+        if(min_value == INT_MAX)
+            return min_value;
     }
+    std::cout << "FATAL ERROR" << std::endl;
+    std::cin >> min_value;
+
 }
 double Job::min_simulated_deadline_ros2()
 {

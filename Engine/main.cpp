@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
             executor.assign_deadline_for_simulated_jobs();
             while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
             {
-                // EDF
+                // OURS
                 executor.check_job_precedence_graph();
                 is_simulatable = executor.run_simulation();                      // run a job on the simulator
                 schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
             executor.assign_deadline_for_simulated_jobs_ros2();
             while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
             {
-                // ROS2 EXECUTOR
+                // ALL-SYNC
                 executor.check_ros2_ready_set();
                 is_simulatable = executor.run_simulation();          
                 executor.check_ros2_ready_set();            // run a job on the simulator
@@ -171,20 +171,12 @@ int main(int argc, char *argv[])
             }
             schedule_generator.generate_schedule_offline();
             executor.set_simulator_scheduler_mode(2); // True time Scheduling Mode
-            for(auto ecu : vectors::ecu_vector)
-            {
-                for(auto job : ecu->get_finished_jobset())
-                {
-                    vectors::released_set.push_back(job);
-                }
-            }
-            executor.assign_deadline_for_simulated_jobs_ros2();
+            executor.assign_deadline_for_simulated_jobs();
             while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
             {
-                // True Time EXECUTOR
-                executor.check_ros2_ready_set();
-                is_simulatable = executor.run_simulation();          
-                executor.check_ros2_ready_set();            // run a job on the simulator
+                // True Time
+                executor.check_job_precedence_graph();
+                is_simulatable = executor.run_simulation();                      // run a job on the simulator
                 schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
                 offline_guider.update_job_precedence_graph();   // update job_precedence_graph
                 utils::current_time = utils::current_time + 0.1;
