@@ -397,7 +397,6 @@ void Job::update_simulated_deadline()
     {
         if(this->get_is_write())
         {
-            
             m_simulated_deadline = static_cast<double>(m_real_finish_time);
             if(m_simulated_deadline == 0)
             {
@@ -452,16 +451,13 @@ double Job::min_simulated_deadline_det_successor()
             }
         }
         add_history(min_succ);
-        return min_value;
+        return min_value - get_fet();
     }
     else
     {
         if(min_value == INT_MAX)
             return min_value;
     }
-    std::cout << "FATAL ERROR" << std::endl;
-    std::cin >> min_value;
-
 }
 double Job::min_simulated_deadline_ros2()
 {

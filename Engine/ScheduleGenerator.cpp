@@ -76,6 +76,8 @@ bool ScheduleGenerator::generate_schedule_offline()
 
     while(m_offline_current_time <= (0 + utils::hyper_period))
     {
+        for(int it = 0; it < 2; it++)
+        {
         for(auto ecu : vectors::ecu_vector)
         {
             for(auto job : ecu->get_released_jobset())
@@ -149,7 +151,7 @@ bool ScheduleGenerator::generate_schedule_offline()
                     ecu->get_who_is_running()->set_real_finish_time(ecu->get_who_is_running()->get_real_start_time() + ecu->get_who_is_running()->get_fet());
                     ecu->get_who_is_running()->set_is_real_started(true);
                     ecu->get_who_is_running()->set_is_real_running(true);
-                    
+                    //std::cout << "START "<< ecu->get_who_is_running()->get_task_name() << "," << ecu->get_who_is_running()->get_job_id() << " " << m_offline_current_time << std::endl;  
                     if(ecu->get_who_is_running()->get_consumer() == nullptr)
                     {
                         // THERE IS NO CONSUMER TO THIS JOB
@@ -173,6 +175,7 @@ bool ScheduleGenerator::generate_schedule_offline()
                 // IF RUNNING JOB IS FINISHED
                 if(ecu->get_who_is_running()->get_real_finish_time() == m_offline_current_time)
                 {
+                    //std::cout << "FINISH "<< ecu->get_who_is_running()->get_task_name() << "," << ecu->get_who_is_running()->get_job_id() << " " << m_offline_current_time << std::endl;  
                     ecu->get_who_is_running()->set_is_real_finished(true);
                     ecu->get_who_is_running()->set_is_real_running(false);
                     
@@ -215,7 +218,7 @@ bool ScheduleGenerator::generate_schedule_offline()
                         ecu->get_who_is_running()->set_real_finish_time(ecu->get_who_is_running()->get_real_start_time() + ecu->get_who_is_running()->get_fet());
                         ecu->get_who_is_running()->set_is_real_started(true);
                         ecu->get_who_is_running()->set_is_real_running(true);
-                        
+                        //std::cout << "START "<< ecu->get_who_is_running()->get_task_name() << "," << ecu->get_who_is_running()->get_job_id() << " " << m_offline_current_time << std::endl;  
                         if(ecu->get_who_is_running()->get_consumer() == nullptr)
                         {
                             // THERE IS NO CONSUMER TO THIS JOB
@@ -235,6 +238,7 @@ bool ScheduleGenerator::generate_schedule_offline()
                    // DO NOTHING
                 }
             }
+        }
         }
         m_offline_current_time ++;
     }

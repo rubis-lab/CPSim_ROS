@@ -77,14 +77,16 @@ void Initializer::initialize()
          * number of ECU is [3-10]
          */
         random_ecu_generator((rand() % 8) + 3);
-        //random_ecu_generator(10);
+        //random_ecu_generator(1);
         /**
          * Task Vector Initialization
          */
         
         int ecu_num = vectors::ecu_vector.size();
         int random_task_num = ecu_num * ((rand() % 5) + 1);
+        //int random_task_num = 5;
         int random_transaction_num = std::ceil(utils::transaction_factor * random_task_num);
+        //int random_transaction_num = 2;
         if(random_transaction_num == 0)
             random_transaction_num = 1;
         // std::cout << "ECU :" << ecu_num  << std::endl;
@@ -109,7 +111,6 @@ void Initializer::initialize()
      */    
     global_object::logger = std::make_shared<Logger>();
     global_object::logger->log_transaction_status();
-
 }
 
 void Initializer::random_ecu_generator(int ecu_num)

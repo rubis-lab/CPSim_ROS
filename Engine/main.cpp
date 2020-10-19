@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         /**
          * SYNTHETIC WORKLOAD SIMULATION OPTIONS
          */
-        int epochs = 1;
+        int epochs = 100;
         int ours_simulatable_count = 0;
         int all_sync_simulatable_count = 0;
         int true_time_simulatable_count = 0;
@@ -80,8 +80,10 @@ int main(int argc, char *argv[])
             Initializer initializer_module;
             ScheduleGenerator schedule_generator;
             OfflineGuider offline_guider;
-            Executor executor;
-            
+            Executor executor_ours;
+            Executor executor_all_sync;
+            Executor executor_true_time;
+
             initializer_module.initialize();
             bool is_simulatable = true;
             bool is_schedulable = schedule_generator.generate_schedule_offline();
@@ -89,7 +91,6 @@ int main(int argc, char *argv[])
             {
                 //std::cout << iter << std::endl;
                 iter++;
-
             }
             else
             {
@@ -114,13 +115,13 @@ int main(int argc, char *argv[])
             global_object::logger->print_job_execution_on_ECU();
             offline_guider.construct_job_precedence_graph();
 
-            executor.set_simulator_scheduler_mode(0); // EDF Scheduling Mode
-            executor.assign_deadline_for_simulated_jobs();
+            executor_ours.set_simulator_scheduler_mode(0); // EDF Scheduling Mode
+            executor_ours.assign_deadline_for_simulated_jobs();
             while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
             {
                 // OURS
-                executor.check_job_precedence_graph();
-                is_simulatable = executor.run_simulation();                      // run a job on the simulator
+                executor_ours.check_job_precedence_graph();
+                is_simulatable = executor_ours.run_simulation();                      // run a job on the simulator
                 schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
                 offline_guider.update_job_precedence_graph();   // update job_precedence_graph
                 utils::current_time = utils::current_time + 0.1;
@@ -142,25 +143,22 @@ int main(int argc, char *argv[])
                 ecu->clear_every_jobset();
             }
             schedule_generator.generate_schedule_offline();
-            executor.set_simulator_scheduler_mode(1); // ROS2 Scheduling Mode
-            for(auto ecu : vectors::ecu_vector)
-            {
-                for(auto job : ecu->get_finished_jobset())
-                {
-                    vectors::released_set.push_back(job);
-                }
-            }
-            executor.assign_deadline_for_simulated_jobs_ros2();
+            offline_guider.construct_job_precedence_graph();
+            executor_all_sync.set_simulator_scheduler_mode(1); // ALL-SYNC
+            executor_all_sync.assign_deadline_for_simulated_jobs();
+
+            //std::cout << std::endl << "ALL SYNC"<< std::endl;
+            //utils::cnt = 0;
             while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
             {
                 // ALL-SYNC
-                executor.check_ros2_ready_set();
-                is_simulatable = executor.run_simulation();          
-                executor.check_ros2_ready_set();            // run a job on the simulator
+                executor_all_sync.check_job_precedence_graph();
+                is_simulatable = executor_all_sync.run_simulation();                      // run a job on the simulator
                 schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
                 offline_guider.update_job_precedence_graph();   // update job_precedence_graph
                 utils::current_time = utils::current_time + 0.1;
             }
+            //std::cout << utils::cnt << std::endl;           
             if(is_simulatable == true)
             {
                 all_sync_simulatable_count ++;
@@ -169,18 +167,34 @@ int main(int argc, char *argv[])
             {
                 all_sync_non_simulatable_count++;
             }
+ 
+            is_simulatable = true;
+            utils::current_time = 0;
+            vectors::job_precedence_graph.clear();
+            for(auto ecu : vectors::ecu_vector)
+            {
+                ecu->clear_every_jobset();
+            }
             schedule_generator.generate_schedule_offline();
-            executor.set_simulator_scheduler_mode(2); // True time Scheduling Mode
-            executor.assign_deadline_for_simulated_jobs();
+            offline_guider.construct_job_precedence_graph();
+            executor_true_time.set_simulator_scheduler_mode(2); // True time Scheduling Mode
+            executor_true_time.assign_deadline_for_simulated_jobs();
+            //std::cout << std::endl << "TRUE TIME "<< std::endl;
             while((utils::current_time <= utils::hyper_period) && is_simulatable) // we are going to run simulation with two hyper period times. 
             {
                 // True Time
-                executor.check_job_precedence_graph();
-                is_simulatable = executor.run_simulation();                      // run a job on the simulator
+                executor_true_time.check_job_precedence_graph();
+                is_simulatable = executor_true_time.run_simulation();                      // run a job on the simulator
                 schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
                 offline_guider.update_job_precedence_graph();   // update job_precedence_graph
                 utils::current_time = utils::current_time + 0.1;
             }
+   
+            
+            //if(utils::all_sync_cnt != utils::true_time_cnt)
+            //    std::cout << utils::all_sync_cnt << ", " << utils::true_time_cnt << std::endl;
+            utils::true_time_cnt = 0;
+            utils::all_sync_cnt = 0;
             if(is_simulatable == true)
             {
                 true_time_simulatable_count ++;
@@ -209,17 +223,18 @@ int main(int argc, char *argv[])
 
         // PRINT THE INFORMATIONS
         std::cout << std::endl;
-        std::cout << "--------------------" << std::endl;
-        std::cout << ours_simulatable_count << " OURS simulations were simulatable." << std::endl;
-        std::cout << ours_non_simulatable_count << " OURS simulations were non-simulatable." << std::endl;
-        std::cout << all_sync_simulatable_count << " ALL-SYNC simulations were simulatable." << std::endl;
-        std::cout << all_sync_non_simulatable_count << " ALL-SYNC simulations were non-simulatable." << std::endl;
-        std::cout << true_time_simulatable_count << " TRUE TIME simulations were simulatable." << std::endl;
-        std::cout << true_time_non_simulatable_count << " TRUE TIME simulations were non-simulatable." << std::endl;
+        // std::cout << "--------------------" << std::endl;
+        // std::cout << ours_simulatable_count << " OURS simulations were simulatable." << std::endl;
+        // std::cout << ours_non_simulatable_count << " OURS simulations were non-simulatable." << std::endl;
+        // std::cout << all_sync_simulatable_count << " ALL-SYNC simulations were simulatable." << std::endl;
+        // std::cout << all_sync_non_simulatable_count << " ALL-SYNC simulations were non-simulatable." << std::endl;
+        // std::cout << true_time_simulatable_count << " TRUE TIME simulations were simulatable." << std::endl;
+        // std::cout << true_time_non_simulatable_count << " TRUE TIME simulations were non-simulatable." << std::endl;
         
-        std::cout << "Simulatability ratio is " << ours_simulatable_count / (double)(ours_simulatable_count + ours_non_simulatable_count) << std::endl;
-        std::cout << "Simulatability ratio is " << all_sync_simulatable_count / (double)(all_sync_simulatable_count + all_sync_non_simulatable_count) << std::endl;
-        std::cout << "Simulatability ratio is " << true_time_simulatable_count / (double)(true_time_simulatable_count + true_time_non_simulatable_count) << std::endl;
+        std::cout << utils::write_factor << std::endl;
+        std::cout << "OURS " << ours_simulatable_count / (double)(ours_simulatable_count + ours_non_simulatable_count) << std::endl;
+        std::cout << "ALL-SYNC " << all_sync_simulatable_count / (double)(all_sync_simulatable_count + all_sync_non_simulatable_count) << std::endl;
+        std::cout << "TRUE-TIME " << true_time_simulatable_count / (double)(true_time_simulatable_count + true_time_non_simulatable_count) << std::endl;
         std::cout << "--------------------" << std::endl;
         utils::write_factor = utils::write_factor + 0.1;
     }

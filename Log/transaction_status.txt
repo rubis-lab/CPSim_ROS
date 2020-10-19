@@ -5,8 +5,8 @@ PERIOD : 10
 FET : 2
 CallbackType: 0
 Chain pos: 0
-ECU id: 0
-Priority: 0
+ECU id: 3
+Priority: 2
 
 
 Transaction ID : 1
@@ -16,13 +16,30 @@ FET : 5
 CallbackType: 0
 Chain pos: 0
 ECU id: 1
-Priority: 1
+Priority: 0
 TASK NAME: T1,1
 PERIOD : -1
 FET : 5
 CallbackType: 1
 Chain pos: 1
 ECU id: 2
+Priority: 1001
+TASK NAME: T1,2
+PERIOD : -1
+FET : 5
+CallbackType: 1
+Chain pos: 2
+ECU id: 4
 Priority: 1000
+
+
+Transaction ID : 2
+TASK NAME: T2,0
+PERIOD : 50
+FET : 10
+CallbackType: 0
+Chain pos: 0
+ECU id: 0
+Priority: 1
 
 

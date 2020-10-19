@@ -36,6 +36,9 @@ namespace utils
     inline double read_factor = 0.0;
     inline double write_factor = 0.0;
     inline double simple_mapping_function = 0.3;
+    inline int all_sync_cnt = 0;
+    inline int true_time_cnt = 0;
+
 
     inline bool real_workload = false; 
 
