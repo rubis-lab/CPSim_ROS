@@ -451,7 +451,7 @@ double Job::min_simulated_deadline_det_successor()
             }
         }
         add_history(min_succ);
-        return min_value - get_fet();
+        return min_value - get_simulated_execution_time();
     }
     else
     {

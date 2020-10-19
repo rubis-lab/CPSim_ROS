@@ -1,0 +1,66 @@
+
+0
+OURS 1
+ALL-SYNC 1
+TRUE-TIME 1
+--------------------
+
+0.1
+OURS 0.88
+ALL-SYNC 0.57
+TRUE-TIME 0.52
+--------------------
+
+0.2
+OURS 0.88
+ALL-SYNC 0.67
+TRUE-TIME 0.64
+--------------------
+
+0.3
+OURS 0.82
+ALL-SYNC 0.51
+TRUE-TIME 0.48
+--------------------
+
+0.4
+OURS 0.83
+ALL-SYNC 0.4
+TRUE-TIME 0.35
+--------------------
+
+0.5
+OURS 0.84
+ALL-SYNC 0.36
+TRUE-TIME 0.35
+--------------------
+
+0.6
+OURS 0.88
+ALL-SYNC 0.31
+TRUE-TIME 0.28
+--------------------
+
+0.7
+OURS 0.78
+ALL-SYNC 0.22
+TRUE-TIME 0.17
+--------------------
+
+0.8
+OURS 0.81
+ALL-SYNC 0.28
+TRUE-TIME 0.24
+--------------------
+
+0.9
+OURS 0.72
+ALL-SYNC 0.28
+TRUE-TIME 0.23
+--------------------
+
+1
+OURS 0.7
+ALL-SYNC 0.23
+TRUE-TIME 0.2
+--------------------

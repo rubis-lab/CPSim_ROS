@@ -214,6 +214,7 @@ bool Executor::run_simulation()
         {
             if(ABS(who_is_running->get_simulated_finish_time() - utils::current_time) < EPSILON)
             {
+                m_job_order.push_back(who_is_running);
                 //std::cout <<"[ALL-SYNC FINIH] "<< utils::current_time <<": "<< who_is_running->get_real_start_time() << ", "<< who_is_running->get_simulated_finish_time()  << ", " << who_is_running->get_simulated_deadline() << std::endl;
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
@@ -274,6 +275,7 @@ bool Executor::run_simulation()
         {
             if(ABS(who_is_running->get_simulated_finish_time() - utils::current_time) < EPSILON)
             {
+                m_job_order.push_back(who_is_running);
                 //std::cout <<"[TRUE-TIME FINIS] "<< utils::current_time <<": "<< who_is_running->get_real_start_time() << ", "<< who_is_running->get_simulated_finish_time() << ", " << who_is_running->get_simulated_deadline() << std::endl;
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
@@ -569,4 +571,9 @@ void Executor::check_ros2_ready_set()
             is_all_deleted = true;
         }
     }
+}
+
+std::vector<std::shared_ptr<Job>> Executor::get_job_order()
+{
+    return m_job_order;
 }

@@ -25,6 +25,7 @@ private:
     std::vector<std::shared_ptr<Job>> m_simulation_ready_queue;
     std::vector<std::shared_ptr<Job>> m_ready_set;
     std::vector<std::shared_ptr<Job>> m_pending_set;
+    std::vector<std::shared_ptr<Job>> m_job_order;
 
 public:
     /**
@@ -40,6 +41,7 @@ public:
     int get_current_hyper_period_start();
     int get_current_hyper_period_end();
     int get_simulator_scheduler_mode();
+    std::vector<std::shared_ptr<Job>> get_job_order();
     bool get_is_busy();
 
     void set_current_hyper_period_index(int); 
