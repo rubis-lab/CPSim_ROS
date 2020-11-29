@@ -21,6 +21,7 @@ private:
     int m_current_hyper_period_end;
     int m_simulator_scheduler_mode; // 0 : OURS, 1 : ALL-SYNC , 2 : TRUE TIME
     bool is_busy;
+    bool no_event;
     std::shared_ptr<Job> who_is_running;
     std::vector<std::shared_ptr<Job>> m_simulation_ready_queue;
     std::vector<std::shared_ptr<Job>> m_ready_set;
@@ -43,11 +44,13 @@ public:
     int get_simulator_scheduler_mode();
     std::vector<std::shared_ptr<Job>> get_job_order();
     bool get_is_busy();
+    bool get_no_event();
 
     void set_current_hyper_period_index(int); 
     void set_current_hyper_period_start(int);
     void set_current_hyper_period_end(int);
     void set_simulator_scheduler_mode(int);
+    void set_no_event(bool);
 
     /**
      * Simulation Member Functions

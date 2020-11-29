@@ -76,130 +76,68 @@ bool ScheduleGenerator::generate_schedule_offline()
 
     while(m_offline_current_time <= (0 + utils::hyper_period))
     {
-        for(int it = 0; it < 2; it++)
+        bool event_not_exist = false;
+        while(event_not_exist == false)
         {
-        for(auto ecu : vectors::ecu_vector)
-        {
-            for(auto job : ecu->get_released_jobset())
+            event_not_exist = true;
+            for(auto ecu : vectors::ecu_vector)
             {
-                // IF Job is a timer callback, it can be directly added to ReadySet.
-                if(job->get_callback_type() == 0)
+                for(auto job : ecu->get_released_jobset())
                 {
-                    if(job->get_real_release_time() == m_offline_current_time)
-                    {
-                        job->set_is_real_released(true);
-                        ecu->add_job_to_ready_set(job);
-                        ecu->delete_job_from_released_jobset(std::move(job));
-                    }
-                }
-                else // IF Job is a subscriber callback, it should wait until readySet is empty.
-                {
-                    if(ecu->get_ecu_ready_set().size() == 0)
+                    // IF Job is a timer callback, it can be directly added to ReadySet.
+                    if(job->get_callback_type() == 0)
                     {
                         if(job->get_real_release_time() == m_offline_current_time)
                         {
                             job->set_is_real_released(true);
                             ecu->add_job_to_ready_set(job);
                             ecu->delete_job_from_released_jobset(std::move(job));
-                            if(ecu->get_pending_jobset().size() != 0)
-                            {
-                                ecu->copy_pending_jobset_to_ready_set();
-                                ecu->flush_pending_jobset();    
-                            }
                         }
                     }
-                    else
+                    else // IF Job is a subscriber callback, it should wait until readySet is empty.
                     {
-                        if(job->get_real_release_time() == m_offline_current_time)
+                        if(ecu->get_ecu_ready_set().size() == 0)
                         {
-                            job->set_is_real_released(true);
-                            ecu->add_job_to_pending_jobset(job);
-                            ecu->delete_job_from_released_jobset(std::move(job));
+                            if(job->get_real_release_time() == m_offline_current_time)
+                            {
+                                if(ecu->get_pending_jobset().size() == 0)
+                                {
+                                    job->set_is_real_released(true);
+                                    ecu->add_job_to_ready_set(job);
+                                    ecu->delete_job_from_released_jobset(std::move(job));
+                                }
+                                else
+                                {
+                                    ecu->copy_pending_jobset_to_ready_set();
+                                    ecu->flush_pending_jobset();  
+                                }   
+                            }
                         }
                         else
                         {
-                            continue;   
+                            if(job->get_real_release_time() == m_offline_current_time)
+                            {
+                                job->set_is_real_released(true);
+                                ecu->add_job_to_pending_jobset(job);
+                                ecu->delete_job_from_released_jobset(std::move(job));
+                            }
+                            else
+                            {
+                                continue;   
+                            }
                         }
                     }
                 }
-            }
-            // IF ECU IS IDLE NOW,
-            if(ecu->get_is_busy() == false)
-            {
-                // IF ready_set is not empty, we should start a highest job. 
-                if(ecu->get_ecu_ready_set().size() != 0)
+                // IF ECU IS IDLE NOW,
+                if(ecu->get_is_busy() == false)
                 {
-                    // select a highest job in the ReadySet
-                    // for that, we must find minimum priority value. 
-                    ecu->set_is_busy(true);
-                    ecu->set_l_busy_period_start_time(m_offline_current_time);
-                    int minimum_priority_value = INT_MAX;
-                    int minimum_idx = 0;
-                    for(int job_idx = 0; job_idx < ecu->get_ecu_ready_set().size(); job_idx++)
+                    // IF ready_set is not empty, we should start a highest job. 
+                    if(ecu->get_ecu_ready_set().size() != 0)
                     {
-                        if(ecu->get_ecu_ready_set().at(job_idx)->get_priority() < minimum_priority_value)
-                        {
-                            minimum_priority_value = ecu->get_ecu_ready_set().at(job_idx)->get_priority();
-                            minimum_idx = job_idx;
-                        }
-                    }
-                    
-                    // -------------------------------------------------------------------------------------
-                    // run a highest job, and if the job has subscriber, then set its release time as job's finish time and add it to released job set
-                    ecu->set_who_is_running(ecu->get_ecu_ready_set().at(minimum_idx));
-                    ecu->get_who_is_running()->set_real_start_time(m_offline_current_time);
-                    ecu->get_who_is_running()->set_real_finish_time(ecu->get_who_is_running()->get_real_start_time() + ecu->get_who_is_running()->get_fet());
-                    ecu->get_who_is_running()->set_is_real_started(true);
-                    ecu->get_who_is_running()->set_is_real_running(true);
-                    //std::cout << "START "<< ecu->get_who_is_running()->get_task_name() << "," << ecu->get_who_is_running()->get_job_id() << " " << m_offline_current_time << std::endl;  
-                    if(ecu->get_who_is_running()->get_consumer() == nullptr)
-                    {
-                        // THERE IS NO CONSUMER TO THIS JOB
-                    }
-                    else
-                    {
-                        std::shared_ptr<Job> consumer_job = std::make_shared<Job>(ecu->get_who_is_running()->get_consumer(),ecu->get_who_is_running()) ;
-                        ecu->get_who_is_running()->set_consumer_job(consumer_job);
-                        consumer_job->set_producer_job(ecu->get_who_is_running());
-                        vectors::ecu_vector.at(consumer_job->get_ECU_id())->add_job_to_released_jobset(std::move(consumer_job));
-                    }
-                }
-                else // IF ready_set is empty, we do nothing.
-                {
-                    // BECAUSE, WE ALREADY ADD PENDING JOBS TO READY SET.
-                }
-
-            }
-            else // IF ECU IS BUSY NOW, 
-            {
-                // IF RUNNING JOB IS FINISHED
-                if(ecu->get_who_is_running()->get_real_finish_time() == m_offline_current_time)
-                {
-                    //std::cout << "FINISH "<< ecu->get_who_is_running()->get_task_name() << "," << ecu->get_who_is_running()->get_job_id() << " " << m_offline_current_time << std::endl;  
-                    ecu->get_who_is_running()->set_is_real_finished(true);
-                    ecu->get_who_is_running()->set_is_real_running(false);
-                    
-                    ecu->delete_job_from_ready_set(ecu->get_who_is_running());
-                    ecu->add_job_to_finished_jobset(ecu->get_who_is_running());
-                    if(ecu->get_who_is_running()->get_real_finish_time() > 
-                       vectors::transaction_vector.at(ecu->get_who_is_running()->get_transaction_id()).at(0)->get_period() * (ecu->get_who_is_running()->get_job_id()))
-                    {
-                        return false;
-                    }
-                    ecu->set_who_is_running(nullptr);
-                    // IF READY SET IS EMPTY AFTER THE JOB FINISHED, THEN FINISH THE BUSY PERIOD
-                    if(ecu->get_ecu_ready_set().size() == 0)
-                    {   
-                        ecu->set_is_busy(false);
-                        ecu->set_l_busy_period_finish_time(m_offline_current_time);
-                        if(ecu->get_pending_jobset().size() != 0)
-                        {
-                            ecu->copy_pending_jobset_to_ready_set();
-                            ecu->flush_pending_jobset();    
-                        }
-                    }
-                    else
-                    {
+                        // select a highest job in the ReadySet
+                        // for that, we must find minimum priority value. 
+                        ecu->set_is_busy(true);
+                        ecu->set_l_busy_period_start_time(m_offline_current_time);
                         int minimum_priority_value = INT_MAX;
                         int minimum_idx = 0;
                         for(int job_idx = 0; job_idx < ecu->get_ecu_ready_set().size(); job_idx++)
@@ -229,16 +167,87 @@ bool ScheduleGenerator::generate_schedule_offline()
                             ecu->get_who_is_running()->set_consumer_job(consumer_job);
                             consumer_job->set_producer_job(ecu->get_who_is_running());
                             vectors::ecu_vector.at(consumer_job->get_ECU_id())->add_job_to_released_jobset(std::move(consumer_job));
+                            
                         }
                     }
-                    
+                    else // IF ready_set is empty, we do nothing.
+                    {
+                        // BECAUSE, WE ALREADY ADD PENDING JOBS TO READY SET.
+                    }
+
                 }
-                else
+                else // IF ECU IS BUSY NOW, 
                 {
-                   // DO NOTHING
+                    // IF RUNNING JOB IS FINISHED
+                    if(ecu->get_who_is_running()->get_real_finish_time() == m_offline_current_time)
+                    {
+                        //std::cout << "FINISH "<< ecu->get_who_is_running()->get_task_name() << "," << ecu->get_who_is_running()->get_job_id() << " " << m_offline_current_time << std::endl;  
+                        ecu->get_who_is_running()->set_is_real_finished(true);
+                        ecu->get_who_is_running()->set_is_real_running(false);
+                        
+                        ecu->delete_job_from_ready_set(ecu->get_who_is_running());
+                        ecu->add_job_to_finished_jobset(ecu->get_who_is_running());
+                        if(ecu->get_who_is_running()->get_real_finish_time() > 
+                        vectors::transaction_vector.at(ecu->get_who_is_running()->get_transaction_id()).at(0)->get_period() * (ecu->get_who_is_running()->get_job_id()))
+                        {
+                            return false;
+                        }
+                        ecu->set_who_is_running(nullptr);
+                        event_not_exist = false;
+                        // IF READY SET IS EMPTY AFTER THE JOB FINISHED, THEN FINISH THE BUSY PERIOD
+                        if(ecu->get_ecu_ready_set().size() == 0)
+                        {   
+                            ecu->set_is_busy(false);
+                            ecu->set_l_busy_period_finish_time(m_offline_current_time);
+                            if(ecu->get_pending_jobset().size() != 0)
+                            {
+                                ecu->copy_pending_jobset_to_ready_set();
+                                ecu->flush_pending_jobset();    
+                            }
+                        }
+                        else
+                        {
+                            int minimum_priority_value = INT_MAX;
+                            int minimum_idx = 0;
+                            for(int job_idx = 0; job_idx < ecu->get_ecu_ready_set().size(); job_idx++)
+                            {
+                                if(ecu->get_ecu_ready_set().at(job_idx)->get_priority() < minimum_priority_value)
+                                {
+                                    minimum_priority_value = ecu->get_ecu_ready_set().at(job_idx)->get_priority();
+                                    minimum_idx = job_idx;
+                                }
+                            }
+                            
+                            // -------------------------------------------------------------------------------------
+                            // run a highest job, and if the job has subscriber, then set its release time as job's finish time and add it to released job set
+                            ecu->set_who_is_running(ecu->get_ecu_ready_set().at(minimum_idx));
+                            ecu->get_who_is_running()->set_real_start_time(m_offline_current_time);
+                            ecu->get_who_is_running()->set_real_finish_time(ecu->get_who_is_running()->get_real_start_time() + ecu->get_who_is_running()->get_fet());
+                            ecu->get_who_is_running()->set_is_real_started(true);
+                            ecu->get_who_is_running()->set_is_real_running(true);
+                            
+                            //std::cout << "START "<< ecu->get_who_is_running()->get_task_name() << "," << ecu->get_who_is_running()->get_job_id() << " " << m_offline_current_time << std::endl;  
+                            if(ecu->get_who_is_running()->get_consumer() == nullptr)
+                            {
+                                // THERE IS NO CONSUMER TO THIS JOB
+                            }
+                            else
+                            {
+                                std::shared_ptr<Job> consumer_job = std::make_shared<Job>(ecu->get_who_is_running()->get_consumer(),ecu->get_who_is_running()) ;
+                                ecu->get_who_is_running()->set_consumer_job(consumer_job);
+                                consumer_job->set_producer_job(ecu->get_who_is_running());
+                                vectors::ecu_vector.at(consumer_job->get_ECU_id())->add_job_to_released_jobset(std::move(consumer_job));
+                                
+                            }
+                        }
+                        
+                    }
+                    else
+                    {
+                    // DO NOTHING
+                    }
                 }
             }
-        }
         }
         m_offline_current_time ++;
     }
@@ -276,7 +285,6 @@ void ScheduleGenerator::generate_schedule_online()
 void ScheduleGenerator::busy_period_analysis(std::vector<std::shared_ptr<Job>>& job_queue, int start, int& end, int ecu_id, bool setWorstCase)
 {
     
-
 }
 
 void ScheduleGenerator::generate_job_instances_for_hyper_period()

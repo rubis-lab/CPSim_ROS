@@ -95,7 +95,7 @@ void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
         {
             for(auto find_job : vectors::job_precedence_graph)
             {
-                if(find_job->get_transaction_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_transaction_id() && 
+                if((find_job->get_transaction_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_transaction_id()) && 
                    find_job->get_job_id() == job->get_job_id())
                 {
                     if(find_job == job)

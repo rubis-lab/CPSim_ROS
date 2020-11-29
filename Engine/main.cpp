@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         /**
          * SYNTHETIC WORKLOAD SIMULATION OPTIONS
          */
-        int epochs = 100;
+        int epochs = 1;
         int ours_simulatable_count = 0;
         int all_sync_simulatable_count = 0;
         int true_time_simulatable_count = 0;
@@ -119,15 +119,22 @@ int main(int argc, char *argv[])
 
             executor_ours.set_simulator_scheduler_mode(0); // EDF Scheduling Mode
             executor_ours.assign_deadline_for_simulated_jobs();
+            
             while((utils::current_time <= utils::hyper_period) && is_simulatable_ours) // we are going to run simulation with two hyper period times. 
             {
                 // OURS
-                executor_ours.check_job_precedence_graph();
-                is_simulatable_ours = executor_ours.run_simulation();                      // run a job on the simulator
-                schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
-                offline_guider.update_job_precedence_graph();   // update job_precedence_graph
+                executor_ours.set_no_event(false);
+                while(executor_ours.get_no_event() == false && is_simulatable_ours)
+                {
+                    executor_ours.set_no_event(true);
+                    executor_ours.check_job_precedence_graph();
+                    is_simulatable_ours = executor_ours.run_simulation();                      // run a job on the simulator
+                    schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
+                    offline_guider.update_job_precedence_graph();   // update job_precedence_graph
+                }
                 utils::current_time = utils::current_time + 0.1;
             }
+            std::cout << vectors::job_precedence_graph.size() << std::endl;
             if(is_simulatable_ours == true)
             {
                 ours_simulatable_count ++;
@@ -153,10 +160,15 @@ int main(int argc, char *argv[])
             while((utils::current_time <= utils::hyper_period) && is_simulatable_all_sync) // we are going to run simulation with two hyper period times. 
             {
                 // ALL-SYNC
-                executor_all_sync.check_job_precedence_graph();
-                is_simulatable_all_sync = executor_all_sync.run_simulation();                      // run a job on the simulator
-                schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
-                offline_guider.update_job_precedence_graph();   // update job_precedence_graph
+                executor_all_sync.set_no_event(false);
+                while(executor_all_sync.get_no_event() == false  && is_simulatable_all_sync)
+                {
+                    executor_all_sync.set_no_event(true);
+                    executor_all_sync.check_job_precedence_graph();
+                    is_simulatable_all_sync = executor_all_sync.run_simulation();                      // run a job on the simulator
+                    schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
+                    offline_guider.update_job_precedence_graph();   // update job_precedence_graph
+                }
                 utils::current_time = utils::current_time + 0.1;
             }
             //std::cout << utils::cnt << std::endl;           
@@ -183,10 +195,15 @@ int main(int argc, char *argv[])
             while((utils::current_time <= utils::hyper_period) && is_simulatable_true_time) // we are going to run simulation with two hyper period times. 
             {
                 // True Time
-                executor_true_time.check_job_precedence_graph();
-                is_simulatable_true_time = executor_true_time.run_simulation();                      // run a job on the simulator
-                schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
-                offline_guider.update_job_precedence_graph();   // update job_precedence_graph
+                executor_true_time.set_no_event(false);
+                while(executor_true_time.get_no_event() == false && is_simulatable_true_time)
+                {
+                    executor_true_time.set_no_event(true);
+                    executor_true_time.check_job_precedence_graph();
+                    is_simulatable_true_time = executor_true_time.run_simulation();                      // run a job on the simulator
+                    schedule_generator.generate_schedule_online();  // when a job finished, then generate a new job. attach that job to the vector
+                    offline_guider.update_job_precedence_graph();   // update job_precedence_graph
+                }
                 utils::current_time = utils::current_time + 0.1;
             }
    
