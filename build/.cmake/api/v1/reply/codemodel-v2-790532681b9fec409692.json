@@ -38,7 +38,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "CPSim_ROS2-0.1.out::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-CPSim_ROS2-0.1.out-Debug-659f4bed69a5cbeeb4b0.json",
+					"jsonFile" : "target-CPSim_ROS2-0.1.out-Debug-7a32e88771c8b8e3b9e9.json",
 					"name" : "CPSim_ROS2-0.1.out",
 					"projectIndex" : 0
 				}
@@ -48,12 +48,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/RUBIS/Documents/GitHub/CPSim_ROS2/build",
-		"source" : "C:/Users/RUBIS/Documents/GitHub/CPSim_ROS2"
+		"build" : "/home/park/git/CPSim_ROS/build",
+		"source" : "/home/park/git/CPSim_ROS"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 1
+		"minor" : 0
 	}
 }

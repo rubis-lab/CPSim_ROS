@@ -95,14 +95,31 @@ void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
         {
             for(auto find_job : vectors::job_precedence_graph)
             {
-                if((find_job->get_transaction_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_transaction_id()) && 
+                if((find_job->get_transaction_id() == job->get_transaction_id()) && 
                    find_job->get_job_id() == job->get_job_id())
                 {
                     if(find_job == job)
                     {
                         continue;
                     }
-                    job->add_job_to_predecessors(find_job);
+                    else
+                    {
+                        if(job->get_chain_pos() <= find_job->get_chain_pos())
+                        {
+                            continue;
+                        }
+                        bool overlapped = false;
+                        for(auto overlapped_job : job->get_det_prdecessors())
+                        {
+                            if(overlapped_job->get_task_id() == find_job->get_task_id() && overlapped_job->get_job_id() == find_job->get_job_id())
+                            {
+                                overlapped = true;
+                                break;
+                            }
+                        }
+                        if(overlapped == false)
+                            job->add_job_to_predecessors(find_job);
+                    }
                 }
             }
             
@@ -111,7 +128,7 @@ void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
         {
             for(auto find_job : vectors::job_precedence_graph)
             {
-                if(find_job->get_transaction_id() == vectors::transaction_vector.at(job->get_transaction_id()).at(task_idx)->get_transaction_id() && 
+                if(find_job->get_transaction_id() ==  job->get_transaction_id() && 
                    find_job->get_job_id() == job->get_job_id())
                 {
                     if(find_job == job)
@@ -125,10 +142,13 @@ void OfflineGuider::recurrent_transaction_analysis(std::shared_ptr<Job> job)
     }
     for(auto find_job : vectors::job_precedence_graph)
     {
-        if( (job->get_transaction_id() == find_job->get_transaction_id()) && (job->get_job_id() < find_job->get_job_id()) && (job->get_task_id() == find_job->get_task_id()))
+        if(find_job->get_chain_pos() ==0)
         {
-            job->add_job_to_successors(find_job);
-            find_job->add_job_to_predecessors(job);
+            if( (job->get_transaction_id() == find_job->get_transaction_id()) && (job->get_job_id() < find_job->get_job_id()) && (job->get_task_id() == find_job->get_task_id()))
+            {
+                job->add_job_to_successors(find_job);
+                find_job->add_job_to_predecessors(job);
+            }
         }
     }
 }

@@ -152,12 +152,13 @@ bool Executor::run_simulation()
         {
             if(ABS(who_is_running->get_simulated_finish_time() - utils::current_time) < EPSILON)
             {
-                std::cout <<"[Ours] "<< utils::current_time <<", " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
+                //std::cout <<"[Ours] "<< utils::current_time <<", " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
                 for(auto job : vectors::job_precedence_graph)
                 {
-                    job->delete_job_from_predecessors(who_is_running);
+                    if(job->get_transaction_id() == who_is_running->get_transaction_id())
+                        job->delete_job_from_predecessors(who_is_running);
                 }
                 no_event = false;
                 if(who_is_running->get_simulated_deadline() < who_is_running->get_simulated_finish_time())
@@ -224,7 +225,7 @@ bool Executor::run_simulation()
                 who_is_running->set_is_simulated_started(true);
                 who_is_running->set_simulated_start_time(utils::current_time);
                 who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
-                std::cout <<"[ALL-SYNC START] "<< utils::current_time <<": " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline() << std::endl;
+                //std::cout <<"[ALL-SYNC START] "<< utils::current_time <<": " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline() << std::endl;
             }
             return true;
         }
@@ -234,17 +235,18 @@ bool Executor::run_simulation()
             {
                 m_job_order.push_back(who_is_running);
                 //std::cout <<"[ALL] " << utils::current_time<<", " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
-                std::cout <<"[ALL-SYNC FINIH] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
+                //std::cout <<"[ALL-SYNC FINIH] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
                 for(auto job : vectors::job_precedence_graph)
                 {
-                    job->delete_job_from_predecessors(who_is_running);
+                    if(job->get_transaction_id() == who_is_running->get_transaction_id())
+                        job->delete_job_from_predecessors(who_is_running);
                 }
                 no_event = false;
                 if(who_is_running->get_simulated_deadline() < who_is_running->get_simulated_finish_time())
                 {
-                    std::cout <<"[ALL-SYNC DEAD] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
+                    //std::cout <<"[ALL-SYNC DEAD] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
                     return false;
                 }
                 else
@@ -258,7 +260,7 @@ bool Executor::run_simulation()
                         who_is_running->set_simulated_start_time(utils::current_time);
                         who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
                         //std::cout <<"[ALL-SYNC START] "<< utils::current_time <<": "<< who_is_running->get_real_start_time() << ", "<< who_is_running->get_simulated_execution_time() << std::endl;
-                        std::cout <<"[ALL-SYNC START] "<< utils::current_time <<": " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
+                        //std::cout <<"[ALL-SYNC START] "<< utils::current_time <<": " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
                         return true;
                     }   
                     else
@@ -297,7 +299,7 @@ bool Executor::run_simulation()
                 who_is_running->set_is_simulated_started(true);
                 who_is_running->set_simulated_start_time(utils::current_time);
                 who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
-                std::cout <<"[TRUE-TIME START] "<< utils::current_time <<": " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
+                //std::cout <<"[TRUE-TIME START] "<< utils::current_time <<": " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
             }
             return true;
         }
@@ -306,17 +308,18 @@ bool Executor::run_simulation()
             if(ABS(who_is_running->get_simulated_finish_time() - utils::current_time) < EPSILON)
             {
                 m_job_order.push_back(who_is_running);
-                std::cout <<"[TRUE-TIME FINIH] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;    
+                //std::cout <<"[TRUE-TIME FINIH] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;    
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
-                for(auto job : vectors::job_precedence_graph)
+               for(auto job : vectors::job_precedence_graph)
                 {
-                    job->delete_job_from_predecessors(who_is_running);
+                    if(job->get_transaction_id() == who_is_running->get_transaction_id())
+                        job->delete_job_from_predecessors(who_is_running);
                 }
                 no_event = false;
                 if(who_is_running->get_simulated_deadline() < who_is_running->get_simulated_finish_time())
                 {
-                    std::cout <<"[TRUE-TIME DEAD] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
+                    //std::cout <<"[TRUE-TIME DEAD] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
                     return false;
                 }
                 else
@@ -329,7 +332,7 @@ bool Executor::run_simulation()
                         who_is_running->set_is_simulated_started(true);
                         who_is_running->set_simulated_start_time(utils::current_time);
                         who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
-                        std::cout <<"[TRUE-TIME START] "<< utils::current_time <<": " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", write: " << who_is_running->get_is_write() << std::endl;
+                        //std::cout <<"[TRUE-TIME START] "<< utils::current_time <<": " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", write: " << who_is_running->get_is_write() << std::endl;
                         return true;
                     }   
                     else
@@ -391,7 +394,7 @@ void Executor::check_job_precedence_graph()
             // READ CONSTRAINED JOB MUST WAIT ITS REAL START TIME
             if(job->get_is_read() == true)
             {
-                if((job->get_real_start_time() > utils::current_time) || (ABS(job->get_real_start_time() - utils::current_time) > EPSILON))
+                if((job->get_real_start_time() > utils::current_time))
                 {
                     continue;
                 }
@@ -415,7 +418,7 @@ void Executor::check_job_precedence_graph()
         for(auto job : vectors::job_precedence_graph)
         {        
             // FOR ALL JOBS, THEIR SIMULATED-START-TIME MUST BE LATER THAN REAL-START-TIME
-            if((job->get_real_start_time() > utils::current_time) || (ABS(job->get_real_start_time() - utils::current_time) > EPSILON))
+            if((job->get_real_start_time() > utils::current_time))
             {
                 continue;
             }
@@ -444,7 +447,7 @@ void Executor::check_job_precedence_graph()
             // READ CONSTRAINED JOB MUST WAIT ITS REAL START TIME
             if(job->get_is_read() == true)
             {
-                if((job->get_real_start_time() > utils::current_time) ||(ABS(job->get_real_start_time() - utils::current_time) > EPSILON))
+                if((job->get_real_start_time() > utils::current_time))
                 {
                     continue;
                 }

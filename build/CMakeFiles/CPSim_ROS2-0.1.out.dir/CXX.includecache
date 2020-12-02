@@ -6,53 +6,17 @@
 
 #IncludeRegexTransform: 
 
-/home/park/git/CPSim_ROS/Engine/ECU.cpp
-ECU.h
-/home/park/git/CPSim_ROS/Engine/ECU.h
-Utils.h
-/home/park/git/CPSim_ROS/Engine/Utils.h
-
 /home/park/git/CPSim_ROS/Engine/ECU.h
 string
 -
 Job.h
 /home/park/git/CPSim_ROS/Engine/Job.h
 
-/home/park/git/CPSim_ROS/Engine/Executor.cpp
-Executor.h
-/home/park/git/CPSim_ROS/Engine/Executor.h
-Utils.h
-/home/park/git/CPSim_ROS/Engine/Utils.h
-ctime
--
-cstdlib
--
-climits
--
-unordered_map
--
-Logger.h
-/home/park/git/CPSim_ROS/Engine/Logger.h
-fstream
--
-
 /home/park/git/CPSim_ROS/Engine/Executor.h
 memory
 -
 Job.h
 /home/park/git/CPSim_ROS/Engine/Job.h
-
-/home/park/git/CPSim_ROS/Engine/Initializer.cpp
-Initializer.h
-/home/park/git/CPSim_ROS/Engine/Initializer.h
-ctime
--
-cstdlib
--
-climits
--
-cmath
--
 
 /home/park/git/CPSim_ROS/Engine/Initializer.h
 stdio.h
@@ -64,20 +28,6 @@ Utils.h
 Logger.h
 /home/park/git/CPSim_ROS/Engine/Logger.h
 
-/home/park/git/CPSim_ROS/Engine/Job.cpp
-Job.h
-/home/park/git/CPSim_ROS/Engine/Job.h
-Utils.h
-/home/park/git/CPSim_ROS/Engine/Utils.h
-ctime
--
-cstdlib
--
-climits
--
-cmath
--
-
 /home/park/git/CPSim_ROS/Engine/Job.h
 Task.h
 /home/park/git/CPSim_ROS/Engine/Task.h
@@ -88,24 +38,6 @@ map
 iostream
 -
 
-/home/park/git/CPSim_ROS/Engine/Logger.cpp
-Logger.h
-/home/park/git/CPSim_ROS/Engine/Logger.h
-Utils.h
-/home/park/git/CPSim_ROS/Engine/Utils.h
-fstream
--
-string
--
-cstdlib
--
-stdio.h
--
-iomanip
--
-climits
--
-
 /home/park/git/CPSim_ROS/Engine/Logger.h
 iostream
 -
@@ -114,23 +46,9 @@ vector
 Job.h
 /home/park/git/CPSim_ROS/Engine/Job.h
 
-/home/park/git/CPSim_ROS/Engine/OfflineGuider.cpp
-OfflineGuider.h
-/home/park/git/CPSim_ROS/Engine/OfflineGuider.h
-memory
--
-
 /home/park/git/CPSim_ROS/Engine/OfflineGuider.h
 Utils.h
 /home/park/git/CPSim_ROS/Engine/Utils.h
-
-/home/park/git/CPSim_ROS/Engine/ScheduleGenerator.cpp
-fstream
--
-climits
--
-ScheduleGenerator.h
-/home/park/git/CPSim_ROS/Engine/ScheduleGenerator.h
 
 /home/park/git/CPSim_ROS/Engine/ScheduleGenerator.h
 Utils.h
@@ -138,14 +56,6 @@ Utils.h
 ctime
 -
 chrono
--
-
-/home/park/git/CPSim_ROS/Engine/Task.cpp
-Task.h
-/home/park/git/CPSim_ROS/Engine/Task.h
-Utils.h
-/home/park/git/CPSim_ROS/Engine/Utils.h
-fstream
 -
 
 /home/park/git/CPSim_ROS/Engine/Task.h
@@ -163,10 +73,6 @@ chrono
 -
 dlfcn.h
 -
-
-/home/park/git/CPSim_ROS/Engine/Utils.cpp
-Utils.h
-/home/park/git/CPSim_ROS/Engine/Utils.h
 
 /home/park/git/CPSim_ROS/Engine/Utils.h
 numeric

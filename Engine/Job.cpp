@@ -505,7 +505,7 @@ void Job::delete_job_from_predecessors(std::shared_ptr<Job> job)
 {
     for(int idx = 0; idx < m_det_predecessors.size(); idx++)
     {
-        if(m_det_predecessors.at(idx) == job)
+        if(m_det_predecessors.at(idx)->get_task_id() == job->get_task_id() && m_det_predecessors.at(idx)->get_job_id() == job->get_job_id())
         {
             m_det_predecessors.erase(m_det_predecessors.begin() + idx);
             break;

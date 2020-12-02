@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         /**
          * SYNTHETIC WORKLOAD SIMULATION OPTIONS
          */
-        int epochs = 1;
+        int epochs = 100;
         int ours_simulatable_count = 0;
         int all_sync_simulatable_count = 0;
         int true_time_simulatable_count = 0;
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
                 }
                 utils::current_time = utils::current_time + 0.1;
             }
-            std::cout << vectors::job_precedence_graph.size() << std::endl;
+            
             if(is_simulatable_ours == true)
             {
                 ours_simulatable_count ++;

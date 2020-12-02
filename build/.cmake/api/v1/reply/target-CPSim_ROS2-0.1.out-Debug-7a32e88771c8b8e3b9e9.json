@@ -2,10 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Debug/CPSim_ROS2-0.1.out.exe"
-		},
-		{
-			"path" : "Debug/CPSim_ROS2-0.1.out.pdb"
+			"path" : "Debug/CPSim_ROS2-0.1.out"
 		}
 	],
 	"backtrace" : 1,
@@ -45,7 +42,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g"
+					"fragment" : "-g  "
 				},
 				{
 					"backtrace" : 2,
@@ -80,16 +77,12 @@
 			{
 				"fragment" : "-DDEBUG -DLINKER_FLAGS",
 				"role" : "flags"
-			},
-			{
-				"fragment" : "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32",
-				"role" : "libraries"
 			}
 		],
 		"language" : "CXX"
 	},
 	"name" : "CPSim_ROS2-0.1.out",
-	"nameOnDisk" : "CPSim_ROS2-0.1.out.exe",
+	"nameOnDisk" : "CPSim_ROS2-0.1.out",
 	"paths" : 
 	{
 		"build" : ".",
