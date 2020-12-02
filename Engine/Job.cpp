@@ -75,6 +75,7 @@ Job::Job(std::shared_ptr<Task> task, int job_id, int hyper_period_start)
     m_simulated_release_time = -1;
     m_simulated_start_time = -1;
     m_simulated_finish_time = -1;
+    m_simulated_time_to_run = -1;
 
     m_is_real_released = false;
     m_is_real_running = false;
@@ -85,6 +86,8 @@ Job::Job(std::shared_ptr<Task> task, int job_id, int hyper_period_start)
     m_is_simulated_running = false;
     m_is_simulated_started = false;
     m_is_simulated_finished = false;
+    m_is_simulated_preempted = false;
+    m_is_simulated_resumed = false;
 }
 /**
  * @fn Job::Job()
@@ -127,6 +130,7 @@ Job::Job(std::shared_ptr<Task> task, std::shared_ptr<Job> producer)
     m_simulated_release_time = -1;
     m_simulated_start_time = -1;
     m_simulated_finish_time = -1;
+    m_simulated_time_to_run = -1;
 
     m_is_real_released = false;
     m_is_real_running = false;
@@ -188,7 +192,14 @@ bool Job::get_is_simulated_finished()
 {
     return m_is_simulated_finished;
 }
-
+bool Job::get_is_simulated_preempted()
+{
+    return m_is_simulated_preempted;
+}
+bool Job::get_is_simulated_resumed()
+{
+    return m_is_simulated_resumed;
+}
 int Job::get_job_id()
 {
     return m_job_id;
@@ -245,6 +256,10 @@ double Job::get_simulated_execution_time()
 {
     return std::floor(m_simulated_execution_time*10)/10;
 }
+double Job::get_simulated_time_to_run()
+{
+    return std::floor(m_simulated_time_to_run*10)/10;
+}
 
 std::shared_ptr<Job> Job::get_producer_job()
 {
@@ -296,7 +311,14 @@ void Job::set_is_simulated_finished(bool is_simulated_finished)
 {
     m_is_simulated_finished = is_simulated_finished;
 }
-
+void Job::set_is_simulated_preempted(bool is_simulated_preempted)
+{
+    m_is_simulated_preempted = is_simulated_preempted;
+}
+void Job::set_is_simulated_resumed(bool is_simulated_resumed)
+{
+    m_is_simulated_resumed = is_simulated_resumed;
+}
 void Job::set_real_release_time(int release_time)
 {
     m_real_release_time = release_time;
@@ -346,6 +368,11 @@ void Job::set_simulated_execution_time(double simulated_execution_time)
 {
     m_simulated_execution_time = std::floor(simulated_execution_time*10)/10;
 }
+void Job::set_simulated_time_to_run(double simulated_time_to_run)
+{
+    m_simulated_time_to_run = std::floor(simulated_time_to_run*10)/10;
+}
+
 void Job::set_producer_job(std::shared_ptr<Job> job)
 {
     m_producer_job = job;

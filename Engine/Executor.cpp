@@ -3,6 +3,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <climits>
+#include <cmath>
 #include <unordered_map>
 #include "Logger.h"
 #include <fstream>
@@ -141,17 +142,31 @@ bool Executor::run_simulation()
                 //-------------------------FIND EARLIEST DEADLINE JOB END -------------------------------------------------------------------------------------
                 who_is_running = m_simulation_ready_queue.at(min_idx);
                 delete_job_from_simulation_ready_queue(who_is_running);
-                who_is_running->set_is_simulated_running(true);
-                who_is_running->set_is_simulated_started(true);
-                who_is_running->set_simulated_start_time(utils::current_time);
-                who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
+                if(who_is_running->get_is_simulated_preempted() == true)
+                {
+                    who_is_running->set_is_simulated_running(true);
+                    who_is_running->set_is_simulated_preempted(false);
+                    who_is_running->set_is_simulated_resumed(true);
+                    who_is_running->set_simulated_finish_time(std::floor(utils::current_time*10)/10 + who_is_running->get_simulated_time_to_run());
+                }
+                else
+                {
+                    who_is_running->set_is_simulated_running(true);
+                    who_is_running->set_is_simulated_started(true);
+                    who_is_running->set_simulated_start_time(std::floor(utils::current_time*10)/10);
+                    who_is_running->set_simulated_time_to_run(who_is_running->get_simulated_execution_time());
+                    who_is_running->set_simulated_finish_time(std::floor(utils::current_time*10)/10 + who_is_running->get_simulated_time_to_run());
+                }
+                //std::cout <<"[START] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
             }
             return true;
         }
         else // IF SIMULATOR IS BUSY,
         {
-            if(ABS(who_is_running->get_simulated_finish_time() - utils::current_time) < EPSILON)
+            // IF a Job Finished
+            if(ABS(who_is_running->get_simulated_finish_time() - std::floor(utils::current_time*10)/10) < EPSILON)
             {
+                //std::cout <<"[FINIH] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
                 //std::cout <<"[Ours] "<< utils::current_time <<", " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
@@ -182,31 +197,78 @@ bool Executor::run_simulation()
 
                         who_is_running = m_simulation_ready_queue.at(min_idx);
                         delete_job_from_simulation_ready_queue(who_is_running);
-                        who_is_running->set_is_simulated_running(true);
-                        who_is_running->set_is_simulated_started(true);
-                        who_is_running->set_simulated_start_time(utils::current_time);
-                        who_is_running->set_simulated_finish_time(who_is_running->get_simulated_start_time() + who_is_running->get_simulated_execution_time());
+                        if(who_is_running->get_is_simulated_preempted() == true)
+                        {
+                            who_is_running->set_is_simulated_running(true);
+                            who_is_running->set_is_simulated_preempted(false);
+                            who_is_running->set_is_simulated_resumed(true);
+                            who_is_running->set_simulated_finish_time(std::floor(utils::current_time*10)/10 + who_is_running->get_simulated_time_to_run());
+                        }
+                        else
+                        {
+                            who_is_running->set_is_simulated_running(true);
+                            who_is_running->set_is_simulated_started(true);
+                            who_is_running->set_simulated_start_time(std::floor(utils::current_time*10)/10);
+                            who_is_running->set_simulated_time_to_run(who_is_running->get_simulated_execution_time());
+                            who_is_running->set_simulated_finish_time(std::floor(utils::current_time*10)/10 + who_is_running->get_simulated_time_to_run());
+                        }
                         return true;
                     }   
                     else
                     {
-                        if(who_is_running->get_consumer() == nullptr)
-                        {
-
-                        }
-                        else
-                        {
-                            no_event = false;
-                        }
-                        
                         who_is_running = nullptr;
                         is_busy = false;
                         return true;
                     }
                 }
             }
+            // IF A JOB STILL RUNNING,
             else
             {
+                // CHECK THERE ARE SOME JOBS MORE HIGHER PRIORITY(EDF DEADLINE)
+                if(m_simulation_ready_queue.size() != 0)
+                {
+                    int min_deadline = INT_MAX;
+                    int min_idx = 0;
+                    for(int job_idx = 0; job_idx < m_simulation_ready_queue.size(); job_idx++)
+                    {
+                        if(m_simulation_ready_queue.at(job_idx)->get_simulated_deadline() < min_deadline)
+                        {
+                            min_idx = job_idx;
+                            min_deadline = m_simulation_ready_queue.at(job_idx)->get_simulated_deadline();
+                        }
+                    }
+                    // IF CURRENT JOB STILL HIGHEST JOB, 
+                    if(who_is_running->get_simulated_deadline() <= m_simulation_ready_queue.at(min_idx)->get_simulated_deadline())
+                    {
+                        
+                    }
+                    // ELSE, PREEMPTION
+                    else
+                    {
+                        who_is_running->set_simulated_time_to_run(who_is_running->get_simulated_finish_time() - std::floor(utils::current_time*10)/10);
+                        m_simulation_ready_queue.push_back(who_is_running);
+                        who_is_running = m_simulation_ready_queue.at(min_idx);
+                        delete_job_from_simulation_ready_queue(who_is_running);
+                        if(who_is_running->get_is_simulated_preempted() == true)
+                        {
+                            who_is_running->set_is_simulated_running(true);
+                            who_is_running->set_is_simulated_preempted(false);
+                            who_is_running->set_is_simulated_resumed(true);
+                            who_is_running->set_simulated_finish_time(std::floor(utils::current_time*10)/10 + who_is_running->get_simulated_time_to_run());
+                        }
+                        else
+                        {
+                            who_is_running->set_is_simulated_running(true);
+                            who_is_running->set_is_simulated_started(true);
+                            who_is_running->set_simulated_start_time(std::floor(utils::current_time*10)/10);
+                            who_is_running->set_simulated_time_to_run(who_is_running->get_simulated_execution_time());
+                            who_is_running->set_simulated_finish_time(std::floor(utils::current_time*10)/10 + who_is_running->get_simulated_time_to_run());
+                        }
+                        //std::cout <<"To "<< who_is_running->get_task_name() <<"," << who_is_running->get_job_id()<<","<< who_is_running->get_simulated_deadline() << std::endl;
+                    }
+                }
+
                 return true;
             }
         }
@@ -234,7 +296,6 @@ bool Executor::run_simulation()
             if(ABS(who_is_running->get_simulated_finish_time() - utils::current_time) < EPSILON)
             {
                 m_job_order.push_back(who_is_running);
-                //std::cout <<"[ALL] " << utils::current_time<<", " << who_is_running->get_task_name() << "," << who_is_running->get_job_id() << std::endl;
                 //std::cout <<"[ALL-SYNC FINIH] "<< utils::current_time <<": "<< who_is_running->get_task_name() << "," << who_is_running->get_job_id() << ", read: " << who_is_running->get_is_read() << ", time: " << who_is_running->get_real_start_time() << ", write: " << who_is_running->get_is_write() << ", time: " << who_is_running->get_real_finish_time() << "," << who_is_running->get_simulated_deadline()<< std::endl;
                 who_is_running->set_is_simulated_running(false);
                 who_is_running->set_is_simulated_finished(true);
@@ -293,7 +354,19 @@ bool Executor::run_simulation()
             if(m_simulation_ready_queue.size() != 0)
             {
                 is_busy = true;
-                who_is_running = m_simulation_ready_queue.front();
+                                //-------------------------FIND FASTEST START TIME JOB START -------------------------------------------------------------------------------------
+                int min_start = INT_MAX;
+                int min_idx = 0;
+                for(int job_idx = 0; job_idx < m_simulation_ready_queue.size(); job_idx++)
+                {
+                    if(m_simulation_ready_queue.at(job_idx)->get_real_start_time() < min_start)
+                    {
+                        min_idx = job_idx;
+                        min_start = m_simulation_ready_queue.at(job_idx)->get_real_start_time();
+                    }
+                }
+                //-------------------------FIND FASTEST START TIME JOB END -------------------------------------------------------------------------------------
+                who_is_running = m_simulation_ready_queue.at(min_idx);
                 delete_job_from_simulation_ready_queue(who_is_running);
                 who_is_running->set_is_simulated_running(true);
                 who_is_running->set_is_simulated_started(true);
@@ -326,7 +399,19 @@ bool Executor::run_simulation()
                 {
                     if(m_simulation_ready_queue.size() != 0)
                     {
-                        who_is_running = m_simulation_ready_queue.front();
+                        //-------------------------FIND FASTEST START TIME JOB START -------------------------------------------------------------------------------------
+                        int min_start = INT_MAX;
+                        int min_idx = 0;
+                        for(int job_idx = 0; job_idx < m_simulation_ready_queue.size(); job_idx++)
+                        {
+                            if(m_simulation_ready_queue.at(job_idx)->get_real_start_time() < min_start)
+                            {
+                                min_idx = job_idx;
+                                min_start = m_simulation_ready_queue.at(job_idx)->get_real_start_time();
+                            }
+                        }
+                        //-------------------------FIND FASTEST START TIME JOB END -------------------------------------------------------------------------------------
+                        who_is_running = m_simulation_ready_queue.at(min_idx);
                         delete_job_from_simulation_ready_queue(who_is_running);
                         who_is_running->set_is_simulated_running(true);
                         who_is_running->set_is_simulated_started(true);
@@ -337,14 +422,6 @@ bool Executor::run_simulation()
                     }   
                     else
                     {
-                        if(who_is_running->get_consumer() == nullptr)
-                        {
-
-                        }
-                        else
-                        {
-                            no_event = false;
-                        }
                         who_is_running = nullptr;
                         is_busy = false;
                         return true;

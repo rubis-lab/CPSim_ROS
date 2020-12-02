@@ -83,7 +83,7 @@ void Logger::add_current_simulated_job(std::shared_ptr<Job> current_job_instance
 void Logger::log_transaction_status()
 {
     std::ofstream transaction_status;
-    transaction_status.open("/home/park/git/CPSim_ROS/Log/transaction_status.log");
+    transaction_status.open("/home/park/git_base/CPSim_ROS/Log/transaction_status.log");
     std::string contents = "\n";
 
     for(auto transaction : vectors::transaction_vector)
@@ -128,7 +128,7 @@ void Logger::print_offline_guider_status()
 void Logger::print_job_execution_on_ECU()
 {
     std::ofstream execution_schedule;
-    execution_schedule.open("/home/park/git/CPSim_ROS/Log/ECU_schedules.log");
+    execution_schedule.open("/home/park/git_base/CPSim_ROS/Log/ECU_schedules.log");
     std::string contents = "ECU Log\n";
 
     for (auto ecu : vectors::ecu_vector)

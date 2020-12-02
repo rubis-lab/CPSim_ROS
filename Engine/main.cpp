@@ -134,10 +134,10 @@ int main(int argc, char *argv[])
                 }
                 utils::current_time = utils::current_time + 0.1;
             }
-            
+
             if(is_simulatable_ours == true)
             {
-                ours_simulatable_count ++;
+                ours_simulatable_count ++;         
             }
             else
             {
@@ -155,8 +155,6 @@ int main(int argc, char *argv[])
             executor_all_sync.set_simulator_scheduler_mode(1); // ALL-SYNC
             executor_all_sync.assign_deadline_for_simulated_jobs();
 
-            //std::cout << std::endl << "ALL SYNC"<< std::endl;
-            //utils::cnt = 0;
             while((utils::current_time <= utils::hyper_period) && is_simulatable_all_sync) // we are going to run simulation with two hyper period times. 
             {
                 // ALL-SYNC
@@ -171,7 +169,7 @@ int main(int argc, char *argv[])
                 }
                 utils::current_time = utils::current_time + 0.1;
             }
-            //std::cout << utils::cnt << std::endl;           
+       
             if(is_simulatable_all_sync == true)
             {
                 all_sync_simulatable_count ++;
@@ -191,7 +189,7 @@ int main(int argc, char *argv[])
             offline_guider.construct_job_precedence_graph();
             executor_true_time.set_simulator_scheduler_mode(2); // True time Scheduling Mode
             executor_true_time.assign_deadline_for_simulated_jobs();
-            //std::cout << std::endl << "TRUE TIME "<< std::endl;
+
             while((utils::current_time <= utils::hyper_period) && is_simulatable_true_time) // we are going to run simulation with two hyper period times. 
             {
                 // True Time
@@ -207,24 +205,6 @@ int main(int argc, char *argv[])
                 utils::current_time = utils::current_time + 0.1;
             }
    
-            // if(is_simulatable_all_sync == true && is_simulatable_true_time == false)
-            // {
-            //     std::cout << "all_sync" << std::endl;
-            //     for(auto job : executor_all_sync.get_job_order())
-            //     {
-            //         std::cout << job->get_task_name() << ","<<job->get_job_id() <<", "<< job->get_real_start_time() << ", " << job->get_simulated_start_time() << ", " << job->get_simulated_finish_time() << ", " << job->get_simulated_deadline() << std::endl; 
-            //     }
-            //     std::cout << "true_time" << std::endl;
-            //     for(auto job : executor_true_time.get_job_order())
-            //     {
-            //         std::cout << job->get_task_name() << ","<<job->get_job_id() <<", "<< job->get_real_start_time() << ", " << job->get_simulated_start_time() << ", " << job->get_simulated_finish_time() << ", " << job->get_simulated_deadline() << std::endl; 
-            //     }
-            //     std::cout << std::endl;
-            // }         
-            //if(utils::all_sync_cnt != utils::true_time_cnt)
-            //    std::cout << utils::all_sync_cnt << ", " << utils::true_time_cnt << std::endl;
-            utils::true_time_cnt = 0;
-            utils::all_sync_cnt = 0;
             if(is_simulatable_true_time == true)
             {
                 true_time_simulatable_count ++;
@@ -253,14 +233,6 @@ int main(int argc, char *argv[])
 
         // PRINT THE INFORMATIONS
         std::cout << std::endl;
-        // std::cout << "--------------------" << std::endl;
-        // std::cout << ours_simulatable_count << " OURS simulations were simulatable." << std::endl;
-        // std::cout << ours_non_simulatable_count << " OURS simulations were non-simulatable." << std::endl;
-        // std::cout << all_sync_simulatable_count << " ALL-SYNC simulations were simulatable." << std::endl;
-        // std::cout << all_sync_non_simulatable_count << " ALL-SYNC simulations were non-simulatable." << std::endl;
-        // std::cout << true_time_simulatable_count << " TRUE TIME simulations were simulatable." << std::endl;
-        // std::cout << true_time_non_simulatable_count << " TRUE TIME simulations were non-simulatable." << std::endl;
-        
         std::cout << utils::write_factor << std::endl;
         std::cout << "OURS " << ours_simulatable_count / (double)(ours_simulatable_count + ours_non_simulatable_count) << std::endl;
         std::cout << "ALL-SYNC " << all_sync_simulatable_count / (double)(all_sync_simulatable_count + all_sync_non_simulatable_count) << std::endl;

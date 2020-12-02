@@ -76,22 +76,19 @@ void Initializer::initialize()
          * ECU Vector Initialization
          * number of ECU is [3-10]
          */
-        //random_ecu_generator((rand() % 8) + 3);
-        random_ecu_generator(2);
+        random_ecu_generator((rand() % 8) + 3);
+        //random_ecu_generator(2);
         /**
          * Task Vector Initialization
          */
         
         int ecu_num = vectors::ecu_vector.size();
-        //int random_task_num = ecu_num * ((rand() % 5) + 1);
-        int random_task_num = 7;
+        int random_task_num = ecu_num * ((rand() % 5) + 1);
+        //int random_task_num = 7;
         int random_transaction_num = std::ceil(utils::transaction_factor * random_task_num);
         //int random_transaction_num = 2;
         if(random_transaction_num == 0)
             random_transaction_num = 1;
-        // std::cout << "ECU :" << ecu_num  << std::endl;
-        // std::cout << "TASK : " << random_task_num << std::endl;
-        // std::cout << "TRANSACTION : " << random_transaction_num << std::endl;
         if(!random_transaction_generator(random_transaction_num, random_task_num))
             std::cout << "TASK NUMBER IS TOO MUCH" << std::endl;
         /**

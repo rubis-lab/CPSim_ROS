@@ -37,6 +37,8 @@ private:
     bool m_is_simulated_running;
     bool m_is_simulated_started;
     bool m_is_simulated_finished;
+    bool m_is_simulated_preempted;
+    bool m_is_simulated_resumed;
 
     int m_job_id;
     int m_real_release_time;
@@ -52,6 +54,7 @@ private:
     double m_simulated_execution_time;
     double m_simulated_start_time;
     double m_simulated_finish_time;
+    double m_simulated_time_to_run;
 
     std::vector<std::shared_ptr<Job>> m_history_of_sim_deadline;
     std::vector<std::shared_ptr<Job>> m_det_predecessors;
@@ -80,6 +83,8 @@ public:
     bool get_is_simulated_running();
     bool get_is_simulated_started();
     bool get_is_simulated_finished();
+    bool get_is_simulated_preempted();
+    bool get_is_simulated_resumed();
 
     int get_job_id();
     int get_real_release_time();
@@ -95,6 +100,7 @@ public:
     double get_simulated_start_time();
     double get_simulated_finish_time();
     double get_simulated_execution_time();
+    double get_simulated_time_to_run();
     std::vector<std::shared_ptr<Job>> get_history();
 
     std::shared_ptr<Job> get_producer_job();
@@ -113,6 +119,8 @@ public:
     void set_is_simulated_running(bool);
     void set_is_simulated_started(bool);
     void set_is_simulated_finished(bool);
+    void set_is_simulated_preempted(bool);
+    void set_is_simulated_resumed(bool);
     
     void set_job_id(int);
     void set_real_release_time(int);
@@ -126,6 +134,7 @@ public:
     void set_simulated_start_time(double);
     void set_simulated_finish_time(double);
     void set_simulated_execution_time(double);
+    void set_simulated_time_to_run(double);
     
     void set_real_busy_period_start_time(int);
     void set_real_busy_period_finish_time(int);
