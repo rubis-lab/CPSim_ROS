@@ -1,4 +1,4 @@
-# CPSIM_ROS
+# CPSIM_ROS2
 
 
 ```
